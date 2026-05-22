@@ -81,8 +81,11 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
   const series_id = slugs[2];
   const season_number = slugs[0];
   const episode_number = slugs[1];
+  const seriesIdNum = parseInt(series_id);
 
   let epData: TVEpisodeInfo | undefined;
+  let seasonEpisodeCounts: Record<number, number> | undefined;
+
   try {
     epData = await EpisodeInfo({
       id: series_id,
@@ -91,6 +94,23 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
     });
   } catch (error) {
     console.error("Error fetching episode info:", error);
+  }
+
+  try {
+    const seriesInfo = await InfoImagesCreditsTV({
+      type: "info",
+      id: seriesIdNum,
+    }) as TVInfo;
+    if (seriesInfo?.seasons) {
+      seasonEpisodeCounts = {};
+      seriesInfo.seasons.forEach((s) => {
+        if (s.season_number != null) {
+          seasonEpisodeCounts![s.season_number] = s.episode_count ?? 0;
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching series info for progress:", error);
   }
 
   const seriesLinksArray = [
@@ -173,6 +193,7 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
                           ? epData.still_path
                           : "/placeholder.svg"
                       }
+                      seasonEpisodeCounts={seasonEpisodeCounts}
                     />
                   </CardContent>
                 </Card>

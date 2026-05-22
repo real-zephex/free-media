@@ -3,13 +3,15 @@ import { TVInfo, TVCredits, TVImages } from "@/utils/types";
 import { Metadata, ResolvingMetadata } from "next";
 import TVSeriesSeasonCardGen from "@/components/web-ui/season-cards";
 import SeriesInfoTabs from "@/components/web-ui/series-info-tabs";
+import SeriesTrackingPanel from "@/components/web-ui/series-tracking-panel";
+import SeriesHeroStatus from "@/components/web-ui/series-hero-status";
+import SeasonProgressBadge from "@/components/web-ui/season-progress-badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Layers } from "lucide-react";
 
 import Image from "next/image";
@@ -20,12 +22,14 @@ interface Season {
   seasonTitle: string;
 }
 
-const SeasonAccordionFormatter = async ({
+const SeasonAccordionFormatter = ({
   data,
-  id,
+  seriesId,
+  seasonEpisodeCounts,
 }: {
   data: Season[];
-  id: number;
+  seriesId: number;
+  seasonEpisodeCounts: Record<number, number>;
 }) => {
   return (
     <Accordion type="single" collapsible className="w-full space-y-2 mt-8">
@@ -37,15 +41,27 @@ const SeasonAccordionFormatter = async ({
             className="border border-border/50 bg-muted/20 rounded-2xl px-6 overflow-hidden data-[state=open]:bg-muted/30 transition-all"
           >
             <AccordionTrigger className="hover:no-underline py-5">
-              <div className="flex items-center gap-3">
-                <Layers className="h-5 w-5 text-primary" />
-                <span className="text-xl font-black italic tracking-tighter uppercase">
-                  {item.seasonTitle}
-                </span>
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex items-center gap-3">
+                  <Layers className="h-5 w-5 text-primary shrink-0" />
+                  <span className="text-xl font-black italic tracking-tighter uppercase">
+                    {item.seasonTitle}
+                  </span>
+                </div>
+                <SeasonProgressBadge
+                  seriesId={seriesId}
+                  season={item.seasonNumber}
+                  totalEpisodes={
+                    seasonEpisodeCounts[item.seasonNumber] ?? 0
+                  }
+                />
               </div>
             </AccordionTrigger>
             <AccordionContent className="pb-6">
-              <TVSeriesSeasonCardGen id={id} seasonNumber={item.seasonNumber} />
+              <TVSeriesSeasonCardGen
+                id={seriesId}
+                seasonNumber={item.seasonNumber}
+              />
             </AccordionContent>
           </AccordionItem>
         ))
@@ -60,29 +76,42 @@ const SeasonAccordionFormatter = async ({
 
 const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params;
+  const seriesIdNum = parseInt(id);
+
   const series_info: TVInfo = await InfoImagesCreditsTV({
     type: "info",
-    id: parseInt(id),
+    id: seriesIdNum,
   });
   const credits_data: TVCredits = await InfoImagesCreditsTV({
     type: "credits",
-    id: parseInt(id),
+    id: seriesIdNum,
   });
   const images: TVImages = await InfoImagesCreditsTV({
     type: "images",
-    id: parseInt(id),
+    id: seriesIdNum,
   });
 
-  let tempSeasonInfo = [];
-  if (series_info && series_info.number_of_seasons) {
+  let tempSeasonInfo: Season[] = [];
+  const seasonEpisodeCounts: Record<number, number> = {};
+
+  if (series_info && series_info.seasons) {
+    series_info.seasons.forEach((s) => {
+      const num = s.season_number!;
+      tempSeasonInfo.push({
+        seasonNumber: num,
+        seasonTitle: s.name || `Season ${num}`,
+      });
+      seasonEpisodeCounts[num] = s.episode_count ?? 0;
+    });
+  }
+
+  if (tempSeasonInfo.length === 0 && series_info?.number_of_seasons) {
     for (let i = 0; i < series_info.number_of_seasons; i++) {
-      let tempData = {
-        seasonNumber: i + 1,
-        seasonTitle: `Season ${i + 1}`,
-      };
-      tempSeasonInfo.push(tempData);
+      tempSeasonInfo.push({ seasonNumber: i + 1, seasonTitle: `Season ${i + 1}` });
+      seasonEpisodeCounts[i + 1] = seasonEpisodeCounts[i + 1] ?? 0;
     }
   }
+
   const SeasonInfo = tempSeasonInfo;
 
   return (
@@ -115,12 +144,7 @@ const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
             </div>
             <div className="flex flex-col gap-4">
               <div className="space-y-1">
-                <Badge
-                  variant="outline"
-                  className="text-[10px] font-black uppercase tracking-widest border-primary/30 text-primary bg-primary/5 px-3"
-                >
-                  TV SERIES
-                </Badge>
+                <SeriesHeroStatus seriesId={seriesIdNum} />
                 <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-none uppercase italic">
                   {series_info.name}
                 </h1>
@@ -142,12 +166,26 @@ const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
           artwork={images}
         />
 
+        <div className="mt-8">
+          <SeriesTrackingPanel
+            seriesId={seriesIdNum}
+            seriesTitle={series_info.name ?? ""}
+            posterPath={series_info.poster_path ?? null}
+            overview={series_info.overview ?? ""}
+            seasonEpisodeCounts={seasonEpisodeCounts}
+          />
+        </div>
+
         <div className="mt-16">
           <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-3">
             <span className="w-2 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
             Season Archives
           </h2>
-          <SeasonAccordionFormatter data={SeasonInfo} id={parseInt(id)} />
+          <SeasonAccordionFormatter
+            data={SeasonInfo}
+            seriesId={seriesIdNum}
+            seasonEpisodeCounts={seasonEpisodeCounts}
+          />
         </div>
       </div>
     </main>
