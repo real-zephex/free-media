@@ -7,6 +7,7 @@ import { storeIntoLocal, watchStatusRetriever } from "@/utils/localStorage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tv, Monitor, PlayCircle, Eye } from "lucide-react";
 
 const MoviePlayer = ({
@@ -18,22 +19,20 @@ const MoviePlayer = ({
 }) => {
   const [watchStatus, setWatchStatus] = useState<string>("Not found");
   const vidLinksArray = [
-    {
-      title: "Server 1",
-      link: `https://embedmaster.link/1imz6ldd5kpmzdyi/movie/${id}`,
-    },
-    {
-      title: "Server 2",
-      link: `https://vidsrc.vip/embed/movie/${id}?autoplay=false`,
-    },
-    {
-      title: "Server 3",
-      link: `https://vidsrc.icu/embed/movie/${id}`,
-    },
-    {
-      title: "Server 4",
-      link: `https://vidzen.fun/movie/${id}`,
-    },
+    { title: "EmbedMaster", link: `https://embedmaster.link/1imz6ldd5kpmzdyi/movie/${id}` },
+    { title: "VidSrc VIP", link: `https://vidsrc.vip/embed/movie/${id}?autoplay=false` },
+    { title: "VidSrc ICU", link: `https://vidsrc.icu/embed/movie/${id}` },
+    { title: "VidZen", link: `https://vidzen.fun/movie/${id}` },
+    { title: "EZVidAPI", link: `https://ezvidapi.com/embed/movie/${id}` },
+    { title: "MultiEmbed", link: `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+    { title: "2Embed", link: `https://www.2embed.stream/embed/movie/${id}` },
+    { title: "EmbedAPI", link: `https://player.embed-api.stream/?id=${id}` },
+    { title: "StreamSrc", link: `https://streamsrc.cc/watch/movie/tmdbid=${id}` },
+    { title: "VidPop", link: `https://www.vidpop.xyz/embed/?id=${id}` },
+    { title: "VixSrc", link: `https://vixsrc.to/movie/${id}` },
+    { title: "CineSrc", link: `https://cinesrc.st/embed/movie/${id}` },
+    { title: "GoDrive", link: `https://godriveplayer.com/player.php?type=movie&tmdb=${id}` },
+    { title: "VidLink", link: `https://vidlink.pro/embed/movie/${id}` },
   ];
 
   useEffect(() => {
@@ -56,20 +55,23 @@ const MoviePlayer = ({
 
   return (
     <Card className="border-none bg-transparent shadow-none">
-      <Tabs defaultValue="Server 1" className="w-full">
+      <Tabs defaultValue="EmbedMaster" className="w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <TabsList className="bg-muted/50 p-1 rounded-xl border border-border/50">
-            {vidLinksArray.map((items) => (
-              <TabsTrigger 
-                key={items.title} 
-                value={items.title} 
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold"
-              >
-                <Monitor className="h-4 w-4 mr-2" />
-                {items.title}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <ScrollArea className="w-full pb-1">
+            <TabsList className="bg-muted/50 p-1 rounded-xl border border-border/50 inline-flex w-max">
+              {vidLinksArray.map((items) => (
+                <TabsTrigger 
+                  key={items.title} 
+                  value={items.title} 
+                  className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold whitespace-nowrap"
+                >
+                  <Monitor className="h-4 w-4 mr-2" />
+                  {items.title}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <div className="flex items-center gap-3">
             <span className="text-xs font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Status:</span>

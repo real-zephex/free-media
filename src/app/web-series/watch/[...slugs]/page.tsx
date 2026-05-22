@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type Props = {
   params: { slugs: string[] };
@@ -114,41 +115,42 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
   }
 
   const seriesLinksArray = [
-    {
-      title: "Server 1",
-      link: `https://embedmaster.link/1imz6ldd5kpmzdyi/tv/${series_id}/${season_number}/${episode_number}`,
-    },
-    {
-      title: "Server 2",
-      link: `https://vidsrc.vip/embed/tv/${series_id}/${season_number}/${episode_number}`,
-    },
-    {
-      title: "Server 3",
-      link: `https://vidsrc.icu/embed/tv/${series_id}/${season_number}/${episode_number}`,
-    },
-    {
-      title: "Server 4",
-      link: `https://vidzen.fun/tv/${series_id}/${season_number}/${episode_number}`,
-    },
+    { title: "EmbedMaster", link: `https://embedmaster.link/1imz6ldd5kpmzdyi/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "VidSrc VIP", link: `https://vidsrc.vip/embed/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "VidSrc ICU", link: `https://vidsrc.icu/embed/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "VidZen", link: `https://vidzen.fun/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "EZVidAPI", link: `https://ezvidapi.com/embed/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "MultiEmbed", link: `https://multiembed.mov/?video_id=${series_id}&tmdb=1&s=${season_number}&e=${episode_number}` },
+    { title: "2Embed", link: `https://www.2embed.stream/embed/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "EmbedAPI", link: `https://player.embed-api.stream/?id=${series_id}&s=${season_number}&e=${episode_number}` },
+    { title: "StreamSrc", link: `https://streamsrc.cc/watch/series/tmdbid=${series_id}` },
+    { title: "VidPop", link: `https://www.vidpop.xyz/embed/?id=${series_id}&season=${season_number}&episode=${episode_number}` },
+    { title: "VixSrc", link: `https://vixsrc.to/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "CineSrc", link: `https://cinesrc.st/embed/tv/${series_id}/${season_number}/${episode_number}` },
+    { title: "GoDrive", link: `https://godriveplayer.com/player.php?type=series&tmdb=${series_id}&season=${season_number}&episode=${episode_number}` },
+    { title: "VidLink", link: `https://vidlink.pro/embed/tv/${series_id}/${season_number}/${episode_number}` },
   ];
 
   return (
     <main className="min-h-screen pb-20">
       <div className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="Server 1" className="w-full">
+        <Tabs defaultValue="EmbedMaster" className="w-full">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-            <TabsList className="bg-muted/50 p-1 border border-border/50 rounded-xl">
-              {seriesLinksArray.map((items) => (
-                <TabsTrigger
-                  key={items.title}
-                  value={items.title}
-                  className="rounded-lg px-6 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <Monitor className="h-4 w-4 mr-2" />
-                  {items.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <ScrollArea className="w-full pb-1">
+              <TabsList className="bg-muted/50 p-1 border border-border/50 rounded-xl inline-flex w-max">
+                {seriesLinksArray.map((items) => (
+                  <TabsTrigger
+                    key={items.title}
+                    value={items.title}
+                    className="rounded-lg px-6 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
+                  >
+                    <Monitor className="h-4 w-4 mr-2" />
+                    {items.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
 
             <div className="flex items-center gap-3">
               <Badge
