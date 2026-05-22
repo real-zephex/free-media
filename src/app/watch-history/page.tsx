@@ -40,6 +40,7 @@ import {
 import { MovieInfo } from "@/utils/movie-requests/request";
 import { InfoImagesCreditsTV } from "@/utils/tv-requests/request";
 import { MovieInfoType, TVInfo } from "@/utils/types";
+import { clientFetch } from "@/utils/client-cache";
 
 const TABS = ["All", "Watching", "Plan to Watch", "Completed"] as const;
 
@@ -151,12 +152,13 @@ export default function WatchHistoryPage() {
       try {
         let data: MovieInfoType | TVInfo | null = null;
         if (item.type === "MOVIE") {
-          data = (await MovieInfo(item.id.toString())) ?? null;
+          data = (await clientFetch(`hover:movie:${item.id}`, () =>
+            MovieInfo(item.id.toString()),
+          )) ?? null;
         } else {
-          data = ((await InfoImagesCreditsTV({
-            type: "info",
-            id: item.id,
-          })) as TVInfo) ?? null;
+          data = ((await clientFetch(`hover:tv:${item.id}`, () =>
+            InfoImagesCreditsTV({ type: "info", id: item.id }),
+          )) as TVInfo) ?? null;
         }
         setHoverData(data || null);
       } catch {

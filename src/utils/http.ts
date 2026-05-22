@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getRandomApiKey } from "./api-key-randomizer";
 
 const errorLogWindow = new Map<string, number>();
@@ -117,3 +118,21 @@ export function buildTmdbUrl(
 
   return url.toString();
 }
+
+export const CACHE_TIER = {
+  SHORT: 86400,
+  METADATA: 43200,
+  LONG: 604800,
+} as const;
+
+export const cachedTmdbFetch = cache(
+  async <T>(
+    endpoint: string,
+    queryParams: Record<string, string | number>,
+    revalidate: number,
+    context: string,
+  ): Promise<T> => {
+    const url = buildTmdbUrl(endpoint, queryParams);
+    return fetchJsonWithRetry<T>(url, { revalidate, context });
+  },
+);

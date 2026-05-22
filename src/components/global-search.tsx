@@ -9,6 +9,7 @@ import MoviesSearch from "./movies-ui/movie-search-formatter";
 import { MoviesSearchRequest } from "@/utils/movie-requests/request";
 import { SearchTV } from "@/utils/tv-requests/request";
 import SeriesSearchFormatter from "./web-ui/search-cards";
+import { clientFetch } from "@/utils/client-cache";
 
 import {
   Dialog,
@@ -60,10 +61,14 @@ const Search = () => {
       let data;
       try {
         if (provider === "movies") {
-          data = await MoviesSearchRequest(title);
+          data = await clientFetch(`search:movies:${title}`, () =>
+            MoviesSearchRequest(title),
+          );
           setFormat(<MoviesSearch data={data} />);
         } else if (provider === "web-series") {
-          data = await SearchTV({ title: title });
+          data = await clientFetch(`search:tv:${title}`, () =>
+            SearchTV({ title }),
+          );
           setFormat(<SeriesSearchFormatter data={data} />);
         }
       } catch (error) {

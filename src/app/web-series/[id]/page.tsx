@@ -1,18 +1,10 @@
 import { InfoImagesCreditsTV } from "@/utils/tv-requests/request";
 import { TVInfo, TVCredits, TVImages } from "@/utils/types";
 import { Metadata, ResolvingMetadata } from "next";
-import TVSeriesSeasonCardGen from "@/components/web-ui/season-cards";
 import SeriesInfoTabs from "@/components/web-ui/series-info-tabs";
 import SeriesTrackingPanel from "@/components/web-ui/series-tracking-panel";
 import SeriesHeroStatus from "@/components/web-ui/series-hero-status";
-import SeasonProgressBadge from "@/components/web-ui/season-progress-badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Layers } from "lucide-react";
+import SeasonAccordion from "@/components/web-ui/season-accordion";
 
 import Image from "next/image";
 import React from "react";
@@ -21,58 +13,6 @@ interface Season {
   seasonNumber: number;
   seasonTitle: string;
 }
-
-const SeasonAccordionFormatter = ({
-  data,
-  seriesId,
-  seasonEpisodeCounts,
-}: {
-  data: Season[];
-  seriesId: number;
-  seasonEpisodeCounts: Record<number, number>;
-}) => {
-  return (
-    <Accordion type="single" collapsible className="w-full space-y-2 mt-8">
-      {data && data.length > 0 ? (
-        data.map((item, index) => (
-          <AccordionItem
-            key={index}
-            value={`season-${item.seasonNumber}`}
-            className="border border-border/50 bg-muted/20 rounded-2xl px-6 overflow-hidden data-[state=open]:bg-muted/30 transition-all"
-          >
-            <AccordionTrigger className="hover:no-underline py-5">
-              <div className="flex items-center gap-3 w-full">
-                <div className="flex items-center gap-3">
-                  <Layers className="h-5 w-5 text-primary shrink-0" />
-                  <span className="text-xl font-black italic tracking-tighter uppercase">
-                    {item.seasonTitle}
-                  </span>
-                </div>
-                <SeasonProgressBadge
-                  seriesId={seriesId}
-                  season={item.seasonNumber}
-                  totalEpisodes={
-                    seasonEpisodeCounts[item.seasonNumber] ?? 0
-                  }
-                />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-6">
-              <TVSeriesSeasonCardGen
-                id={seriesId}
-                seasonNumber={item.seasonNumber}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        ))
-      ) : (
-        <p className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-2xl">
-          No seasons found
-        </p>
-      )}
-    </Accordion>
-  );
-};
 
 const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
   const { id } = await params;
@@ -181,7 +121,7 @@ const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
             <span className="w-2 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
             Season Archives
           </h2>
-          <SeasonAccordionFormatter
+          <SeasonAccordion
             data={SeasonInfo}
             seriesId={seriesIdNum}
             seasonEpisodeCounts={seasonEpisodeCounts}

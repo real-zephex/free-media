@@ -1,7 +1,6 @@
 "use server";
 
 import { VidSrcCCLinks } from "../more-types";
-// Movies Related Request
 
 import {
   MoviesHomepageResults,
@@ -11,30 +10,24 @@ import {
   FlixHQResults,
   FlixHQMovieLinks,
 } from "../types";
-import { buildTmdbUrl, fetchJsonWithRetry } from "../http";
-
-// Constants
+import { buildTmdbUrl, fetchJsonWithRetry, cachedTmdbFetch, CACHE_TIER } from "../http";
 
 const VIDSRC_CC = "https://dramaflix-movielinks.vercel.app";
 const CONSUMET = process.env.CONSUMET_API_URL;
-const CACHE_DURATION = 21600 * 2; // Cache duration in seconds (6 hours)
+const CACHE_DURATION = CACHE_TIER.METADATA;
 
 const EMPTY_CREDITS: TVCredits = { cast: [], crew: [], id: 0 };
 const EMPTY_IMAGES: TVImages = { backdrops: [], logos: [], posters: [], id: 0 };
 
 const tmdbRequest = async <T>(
   endpoint: string,
-  queryParams: Record<string, string> = {},
+  queryParams: Record<string, string | number> = {},
   context: string,
+  revalidate: number = CACHE_TIER.METADATA,
 ) => {
-  const url = buildTmdbUrl(endpoint, queryParams);
-  return fetchJsonWithRetry<T>(url, {
-    revalidate: CACHE_DURATION,
-    context,
-  });
+  return cachedTmdbFetch<T>(endpoint, queryParams, revalidate, context);
 };
 
-// Discover movies based on type and time window
 export async function MoviesDiscover(
   type: string,
   timeWindow: "day" | "week" = "day",
@@ -47,26 +40,26 @@ export async function MoviesDiscover(
       endpoint,
       {},
       `tmdb:movies:${type}`,
+      CACHE_TIER.SHORT,
     );
   } catch (error) {
     return undefined;
   }
 }
 
-// Search for movies based on query
 export async function MoviesSearchRequest(query: string) {
   try {
     return await tmdbRequest<MoviesHomepageResults>(
       "search/movie",
       { query },
       "tmdb:movies:search",
+      CACHE_TIER.SHORT,
     );
   } catch (error) {
     return undefined;
   }
 }
 
-// Fetch movie details or recommendations
 export async function MovieInfo(
   id: string,
   recommendations: boolean = false,
@@ -80,6 +73,7 @@ export async function MovieInfo(
       endpoint,
       {},
       `tmdb:movie:${id}:${recommendations ? "recommendations" : "info"}`,
+      recommendations ? CACHE_TIER.SHORT : CACHE_TIER.METADATA,
     );
   } catch (error) {
     return undefined;
@@ -99,6 +93,7 @@ export async function MovieCredits({
         `movie/${id}/credits`,
         {},
         `tmdb:movie:${id}:credits`,
+        CACHE_TIER.LONG,
       );
     }
 
@@ -106,6 +101,7 @@ export async function MovieCredits({
       `movie/${id}/images`,
       {},
       `tmdb:movie:${id}:images`,
+      CACHE_TIER.LONG,
     );
   } catch (error) {
     return type === "credits" ? EMPTY_CREDITS : EMPTY_IMAGES;

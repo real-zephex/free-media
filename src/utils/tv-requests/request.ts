@@ -15,16 +15,16 @@ import {
   TVEpisodeInfo,
   FlixHQMovieLinks,
 } from "../types";
-import { buildTmdbUrl, fetchJsonWithRetry } from "../http";
+import { buildTmdbUrl, fetchJsonWithRetry, cachedTmdbFetch, CACHE_TIER } from "../http";
 
 const CONSUMET = process.env.CONSUMET_API_URL;
-const NEXT_CACHE_DURATION = 21600 * 2;
+const CACHE_DURATION = CACHE_TIER.METADATA;
 const VIDSRC_CC = "https://dramaflix-movielinks.vercel.app";
 
 const requestHandler = async <T>(url: string, context: string) => {
   try {
     return await fetchJsonWithRetry<T>(url, {
-      revalidate: NEXT_CACHE_DURATION,
+      revalidate: CACHE_DURATION,
       context,
     });
   } catch (error) {
@@ -36,9 +36,9 @@ const requestTmdb = async <T>(
   endpoint: string,
   queryParams: Record<string, string | number> = {},
   context: string,
+  revalidate: number = CACHE_TIER.METADATA,
 ) => {
-  const url = buildTmdbUrl(endpoint, queryParams);
-  return requestHandler<T>(url, context);
+  return cachedTmdbFetch<T>(endpoint, queryParams, revalidate, context);
 };
 
 export const TopPopularAiringTV = async ({
@@ -50,6 +50,7 @@ export const TopPopularAiringTV = async ({
     `tv/${type}`,
     {},
     `tmdb:tv:${type}`,
+    CACHE_TIER.SHORT,
   );
 };
 
@@ -72,10 +73,13 @@ export const InfoImagesCreditsTV = async ({
     throw new Error("Invalid type provided");
   }
 
+  const isInfo = type === "info";
+
   const response = await requestTmdb<TVCredits | TVImages | TVInfo>(
     url,
     {},
     `tmdb:tv:${id}:${type}`,
+    isInfo ? CACHE_TIER.METADATA : CACHE_TIER.LONG,
   );
 
   switch (type) {
@@ -94,6 +98,7 @@ export const SearchTV = async ({ title }: { title: string }) => {
     "search/tv",
     { query: title },
     "tmdb:tv:search",
+    CACHE_TIER.SHORT,
   );
 };
 
@@ -106,6 +111,7 @@ export const TrendingTV = async ({
     `trending/tv/${time_window}`,
     {},
     `tmdb:tv:trending:${time_window}`,
+    CACHE_TIER.SHORT,
   );
 };
 
@@ -120,6 +126,7 @@ export const SeasonInfo = async ({
     `tv/${id}/season/${season}`,
     {},
     `tmdb:tv:${id}:season:${season}`,
+    CACHE_TIER.LONG,
   );
 };
 
@@ -136,6 +143,7 @@ export const EpisodeInfo = async ({
     `tv/${id}/season/${season}/episode/${episode}`,
     {},
     `tmdb:tv:${id}:s${season}e${episode}`,
+    CACHE_TIER.LONG,
   );
 };
 
@@ -154,7 +162,6 @@ export const FlixHQEpisodeInfo = async ({
     `flixhq:tv-info:${seriesId}`,
   );
 
-  // important
   const { title, id } = infoData;
 
   const seasonSection = infoData.seasons?.find(
@@ -172,7 +179,6 @@ export const FlixHQEpisodeInfo = async ({
     `flixhq:tv-watch:${seriesId}:s${season}e${episode}`,
   );
 
-  // important
   const videoURL = videoData.sources?.find(
     (element) => element.quality === "auto",
   );
