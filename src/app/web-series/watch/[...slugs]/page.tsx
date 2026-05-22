@@ -116,19 +116,11 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
 
   const seriesLinksArray = [
     { title: "EmbedMaster", link: `https://embedmaster.link/1imz6ldd5kpmzdyi/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "VidSrc VIP", link: `https://vidsrc.vip/embed/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "VidSrc ICU", link: `https://vidsrc.icu/embed/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "VidZen", link: `https://vidzen.fun/tv/${series_id}/${season_number}/${episode_number}` },
     { title: "EZVidAPI", link: `https://ezvidapi.com/embed/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "MultiEmbed", link: `https://multiembed.mov/?video_id=${series_id}&tmdb=1&s=${season_number}&e=${episode_number}` },
     { title: "2Embed", link: `https://www.2embed.stream/embed/tv/${series_id}/${season_number}/${episode_number}` },
     { title: "EmbedAPI", link: `https://player.embed-api.stream/?id=${series_id}&s=${season_number}&e=${episode_number}` },
-    { title: "StreamSrc", link: `https://streamsrc.cc/watch/series/tmdbid=${series_id}` },
     { title: "VidPop", link: `https://www.vidpop.xyz/embed/?id=${series_id}&season=${season_number}&episode=${episode_number}` },
     { title: "VixSrc", link: `https://vixsrc.to/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "CineSrc", link: `https://cinesrc.st/embed/tv/${series_id}/${season_number}/${episode_number}` },
-    { title: "GoDrive", link: `https://godriveplayer.com/player.php?type=series&tmdb=${series_id}&season=${season_number}&episode=${episode_number}` },
-    { title: "VidLink", link: `https://vidlink.pro/embed/tv/${series_id}/${season_number}/${episode_number}` },
   ];
 
   return (

@@ -20,19 +20,11 @@ const MoviePlayer = ({
   const [watchStatus, setWatchStatus] = useState<string>("Not found");
   const vidLinksArray = [
     { title: "EmbedMaster", link: `https://embedmaster.link/1imz6ldd5kpmzdyi/movie/${id}` },
-    { title: "VidSrc VIP", link: `https://vidsrc.vip/embed/movie/${id}?autoplay=false` },
-    { title: "VidSrc ICU", link: `https://vidsrc.icu/embed/movie/${id}` },
-    { title: "VidZen", link: `https://vidzen.fun/movie/${id}` },
     { title: "EZVidAPI", link: `https://ezvidapi.com/embed/movie/${id}` },
-    { title: "MultiEmbed", link: `https://multiembed.mov/?video_id=${id}&tmdb=1` },
     { title: "2Embed", link: `https://www.2embed.stream/embed/movie/${id}` },
-    { title: "EmbedAPI", link: `https://player.embed-api.stream/?id=${id}` },
-    { title: "StreamSrc", link: `https://streamsrc.cc/watch/movie/tmdbid=${id}` },
     { title: "VidPop", link: `https://www.vidpop.xyz/embed/?id=${id}` },
     { title: "VixSrc", link: `https://vixsrc.to/movie/${id}` },
     { title: "CineSrc", link: `https://cinesrc.st/embed/movie/${id}` },
-    { title: "GoDrive", link: `https://godriveplayer.com/player.php?type=movie&tmdb=${id}` },
-    { title: "VidLink", link: `https://vidlink.pro/embed/movie/${id}` },
   ];
 
   useEffect(() => {
