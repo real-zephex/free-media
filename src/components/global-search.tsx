@@ -1,49 +1,28 @@
 "use client";
 
-import { SetStateAction, useEffect, useState, useCallback, ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useCallback, ReactNode } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Search as SearchIcon, Loader2, Command } from "lucide-react";
 
-import MoviesSearch from "./movies-ui/movie-search-formatter";
 import { MoviesSearchRequest } from "@/utils/movie-requests/request";
 import { SearchTV } from "@/utils/tv-requests/request";
-import SeriesSearchFormatter from "./web-ui/search-cards";
+import CombinedSearch from "./combined-search";
 import { clientFetch } from "@/utils/client-cache";
 
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Search = () => {
-  const pathname = usePathname() as string;
-  const [provider, setProvider] = useState<string>("movies"); // Default to movies
   const [title, setTitle] = useState<string>("");
   const [format, setFormat] = useState<ReactNode>(<></>);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const segments = pathname.split("/");
-    const test = segments.length > 1 ? segments[1] : "";
-    if (["movies", "web-series"].includes(test)) {
-      setProvider(test);
-    }
-  }, [pathname]);
 
   const handleSearch = useCallback(
     async (event?: React.KeyboardEvent) => {
@@ -58,19 +37,17 @@ const Search = () => {
         </div>,
       );
 
-      let data;
       try {
-        if (provider === "movies") {
-          data = await clientFetch(`search:movies:${title}`, () =>
+        const [moviesData, tvData] = await Promise.all([
+          clientFetch(`search:movies:${title}`, () =>
             MoviesSearchRequest(title),
-          );
-          setFormat(<MoviesSearch data={data} />);
-        } else if (provider === "web-series") {
-          data = await clientFetch(`search:tv:${title}`, () =>
+          ),
+          clientFetch(`search:tv:${title}`, () =>
             SearchTV({ title }),
-          );
-          setFormat(<SeriesSearchFormatter data={data} />);
-        }
+          ),
+        ]);
+
+        setFormat(<CombinedSearch moviesData={moviesData} tvData={tvData} />);
       } catch (error) {
         console.error("Search failed:", error);
         setFormat(<div className="p-4 text-center text-destructive">Search failed. Please try again.</div>);
@@ -78,7 +55,7 @@ const Search = () => {
         setIsLoading(false);
       }
     },
-    [title, provider],
+    [title],
   );
 
   useHotkeys("ctrl+k", (event) => {
@@ -116,15 +93,6 @@ const Search = () => {
                 autoFocus
               />
               <div className="flex items-center gap-2">
-                <Select value={provider} onValueChange={setProvider}>
-                  <SelectTrigger className="w-[100px] md:w-[140px] h-8 md:h-10 bg-white/5 border-white/10 rounded-full text-[10px] md:text-xs font-display">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background/90 backdrop-blur-xl border-white/10 rounded-2xl">
-                    <SelectItem value="movies">Movies</SelectItem>
-                    <SelectItem value="web-series">Web-Series</SelectItem>
-                  </SelectContent>
-                </Select>
                 <Button
                   size="sm"
                   className="h-8 md:h-10 rounded-full font-display font-bold px-4 md:px-6 bg-primary hover:scale-105 transition-transform"
