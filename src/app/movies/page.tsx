@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import React from "react";
 import MoviesGridConstructor from "@/components/movies-ui/movies-formatter";
 import { Metadata } from "next";

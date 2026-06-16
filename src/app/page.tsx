@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { HeroSection } from "@/components/ui/hero-section";
 import { BentoFeatures } from "@/components/ui/bento-features";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";

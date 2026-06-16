@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { TopPopularAiringTV, TrendingTV } from "@/utils/tv-requests/request";
 import { Metadata } from "next";
 import WebHomepageCards from "@/components/web-ui/homepage-cards";

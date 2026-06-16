@@ -125,7 +125,7 @@ const SeriesPlayer = async ({ params }: { params: { slugs: string[] } }) => {
 
   return (
     <main className="min-h-screen pb-20">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 pt-20 md:pt-24 pb-6">
         <Tabs defaultValue="EmbedMaster" className="w-full">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <ScrollArea className="w-full pb-1">

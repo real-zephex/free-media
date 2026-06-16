@@ -2,11 +2,16 @@
   "name": "streamify",
   "version": "0.1.0",
   "private": true,
+  "description": "A premium movie and TV show streaming desktop client",
+  "author": "Dramaflix Team <support@dramaflix.com>",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron:dev": "concurrently -k -s first \"bun run dev\" \"wait-on http://localhost:3000 && electron . --dev\"",
+    "electron:build": "bun run build && electron-builder"
   },
   "dependencies": {
     "@next/third-parties": "^16.1.6",
@@ -42,10 +47,53 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "concurrently": "^10.0.3",
+    "electron": "^42.3.2",
+    "electron-builder": "^26.8.1",
     "eslint": "^10.0.2",
     "eslint-config-next": "^16.1.6",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.10"
+  },
+  "build": {
+    "appId": "com.dramaflix.desktop",
+    "productName": "Dramaflix",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "package.json",
+      "electron/**/*",
+      ".next/**/*",
+      "public/**/*",
+      "next.config.mjs"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      ".next/**/*",
+      "public/**/*",
+      "next.config.mjs",
+      "node_modules/**/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Video",
+      "maintainer": "Dramaflix Team <support@dramaflix.com>"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.entertainment"
+    }
   }
 }
