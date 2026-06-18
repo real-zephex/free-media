@@ -2,6 +2,9 @@
 
 Modern Next.js app for browsing movie and TV metadata with external playback embeds. This repository is a frontend application only. It does not host or store any media files.
 
+
+![Dramaflix Design](/design.png)
+
 ## What This App Does
 
 - Fetches **metadata** (titles, overviews, cast, images, ratings) from TMDB
