@@ -1,11 +1,6 @@
 "use server";
 
 import {
-  FlixHQSeriesInfo,
-  FlixHQSeriesLinks,
-  VidSrcCCLinks,
-} from "../more-types";
-import {
   TrendingPopularTopAiringTV,
   TVSearch,
   TVCredits,
@@ -13,24 +8,14 @@ import {
   TVInfo,
   TVSeasonInfo,
   TVEpisodeInfo,
-  FlixHQMovieLinks,
 } from "../types";
-import { buildTmdbUrl, fetchJsonWithRetry, cachedTmdbFetch, CACHE_TIER } from "../http";
+import { cachedTmdbFetch, CACHE_TIER } from "../http";
 
-const CONSUMET = process.env.CONSUMET_API_URL;
-const CACHE_DURATION = CACHE_TIER.METADATA;
-const VIDSRC_CC = "https://dramaflix-movielinks.vercel.app";
+const TV_LIST_TYPES = new Set(["airing_today", "top_rated", "popular"]);
+const TIME_WINDOWS = new Set(["day", "week"]);
 
-const requestHandler = async <T>(url: string, context: string) => {
-  try {
-    return await fetchJsonWithRetry<T>(url, {
-      revalidate: CACHE_DURATION,
-      context,
-    });
-  } catch (error) {
-    return {} as T;
-  }
-};
+const isPositiveInt = (value: number) =>
+  Number.isInteger(value) && value > 0;
 
 const requestTmdb = async <T>(
   endpoint: string,
@@ -46,6 +31,10 @@ export const TopPopularAiringTV = async ({
 }: {
   type: "airing_today" | "top_rated" | "popular";
 }) => {
+  if (!TV_LIST_TYPES.has(type)) {
+    throw new Error("Invalid TV list type provided");
+  }
+
   return await requestTmdb<TrendingPopularTopAiringTV>(
     `tv/${type}`,
     {},
@@ -69,7 +58,7 @@ export const InfoImagesCreditsTV = async ({
 
   const url = urlMap[type];
 
-  if (!url) {
+  if (!url || !isPositiveInt(id)) {
     throw new Error("Invalid type provided");
   }
 
@@ -107,6 +96,10 @@ export const TrendingTV = async ({
 }: {
   time_window: "day" | "week";
 }) => {
+  if (!TIME_WINDOWS.has(time_window)) {
+    throw new Error("Invalid time window provided");
+  }
+
   return await requestTmdb<TrendingPopularTopAiringTV>(
     `trending/tv/${time_window}`,
     {},
@@ -122,6 +115,10 @@ export const SeasonInfo = async ({
   id: number;
   season: number;
 }) => {
+  if (!isPositiveInt(id) || !isPositiveInt(season)) {
+    throw new Error("Invalid season parameters provided");
+  }
+
   return await requestTmdb<TVSeasonInfo>(
     `tv/${id}/season/${season}`,
     {},
@@ -139,79 +136,14 @@ export const EpisodeInfo = async ({
   season: string;
   episode: string;
 }) => {
+  if (!/^\d+$/.test(id) || !/^\d+$/.test(season) || !/^\d+$/.test(episode)) {
+    throw new Error("Invalid episode parameters provided");
+  }
+
   return await requestTmdb<TVEpisodeInfo>(
     `tv/${id}/season/${season}/episode/${episode}`,
     {},
     `tmdb:tv:${id}:s${season}e${episode}`,
     CACHE_TIER.LONG,
   );
-};
-
-export const FlixHQEpisodeInfo = async ({
-  seriesId,
-  season,
-  episode,
-}: {
-  seriesId: string;
-  season: string;
-  episode: string;
-}) => {
-  const infoUrl = `${CONSUMET}/meta/tmdb/info/${seriesId}?type=tv`;
-  const infoData: FlixHQSeriesInfo = await requestHandler<FlixHQSeriesInfo>(
-    infoUrl,
-    `flixhq:tv-info:${seriesId}`,
-  );
-
-  const { title, id } = infoData;
-
-  const seasonSection = infoData.seasons?.find(
-    (element) => element.season?.toString() == season,
-  );
-  const episodeId = seasonSection?.episodes?.find(
-    (element) => element.episode?.toString() == episode,
-  );
-
-  const cover = episodeId?.img?.hd;
-
-  const seriesVideoLink = `${CONSUMET}/meta/tmdb/watch/${episodeId?.id}?id=${id}`;
-  const videoData: FlixHQSeriesLinks = await requestHandler<FlixHQSeriesLinks>(
-    seriesVideoLink,
-    `flixhq:tv-watch:${seriesId}:s${season}e${episode}`,
-  );
-
-  const videoURL = videoData.sources?.find(
-    (element) => element.quality === "auto",
-  );
-
-  const subs = videoData.subtitles;
-
-  let link2, link3;
-  try {
-    const vidsrcData: VidSrcCCLinks = await requestHandler<VidSrcCCLinks>(
-      `${VIDSRC_CC}/vidsrc/${seriesId}?s=${season}&e=${episode}`,
-      `vidsrc:tv:${seriesId}:s${season}e${episode}`,
-    );
-
-    if (vidsrcData.source2?.data) {
-      link2 = vidsrcData.source2.data.source;
-    }
-    if (vidsrcData.source1?.data) {
-      const tempLink = vidsrcData.source1.data.source;
-      if (tempLink != videoURL?.url) {
-        link3 = tempLink;
-      }
-    }
-  } catch (error) {
-    link2 = undefined;
-    link3 = undefined;
-  }
-
-  return {
-    title,
-    cover,
-    videoURL,
-    subs,
-    link2,
-    link3,
-  };
 };

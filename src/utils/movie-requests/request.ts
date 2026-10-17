@@ -1,23 +1,25 @@
 "use server";
 
-import { VidSrcCCLinks } from "../more-types";
-
 import {
   MoviesHomepageResults,
   MovieInfoType,
   TVCredits,
   TVImages,
-  FlixHQResults,
-  FlixHQMovieLinks,
 } from "../types";
-import { buildTmdbUrl, fetchJsonWithRetry, cachedTmdbFetch, CACHE_TIER } from "../http";
-
-const VIDSRC_CC = "https://dramaflix-movielinks.vercel.app";
-const CONSUMET = process.env.CONSUMET_API_URL;
-const CACHE_DURATION = CACHE_TIER.METADATA;
+import { cachedTmdbFetch, CACHE_TIER } from "../http";
 
 const EMPTY_CREDITS: TVCredits = { cast: [], crew: [], id: 0 };
 const EMPTY_IMAGES: TVImages = { backdrops: [], logos: [], posters: [], id: 0 };
+
+const MOVIE_LIST_TYPES = new Set([
+  "popular",
+  "top_rated",
+  "now_playing",
+  "upcoming",
+]);
+const TIME_WINDOWS = new Set(["day", "week"]);
+
+const isNumericId = (id: string) => /^\d+$/.test(id);
 
 const tmdbRequest = async <T>(
   endpoint: string,
@@ -32,8 +34,15 @@ export async function MoviesDiscover(
   type: string,
   timeWindow: "day" | "week" = "day",
 ) {
-  const endpoint =
-    type === "trending" ? `trending/movie/${timeWindow}` : `movie/${type}`;
+  let endpoint: string;
+  if (type === "trending") {
+    if (!TIME_WINDOWS.has(timeWindow)) return undefined;
+    endpoint = `trending/movie/${timeWindow}`;
+  } else if (MOVIE_LIST_TYPES.has(type)) {
+    endpoint = `movie/${type}`;
+  } else {
+    return undefined;
+  }
 
   try {
     return await tmdbRequest<MoviesHomepageResults>(
@@ -62,18 +71,32 @@ export async function MoviesSearchRequest(query: string) {
 
 export async function MovieInfo(
   id: string,
-  recommendations: boolean = false,
 ): Promise<MovieInfoType | undefined> {
-  const endpoint = recommendations
-    ? `movie/${id}/recommendations`
-    : `movie/${id}`;
+  if (!isNumericId(id)) return undefined;
 
   try {
     return await tmdbRequest<MovieInfoType>(
-      endpoint,
+      `movie/${id}`,
       {},
-      `tmdb:movie:${id}:${recommendations ? "recommendations" : "info"}`,
-      recommendations ? CACHE_TIER.SHORT : CACHE_TIER.METADATA,
+      `tmdb:movie:${id}:info`,
+      CACHE_TIER.METADATA,
+    );
+  } catch (error) {
+    return undefined;
+  }
+}
+
+export async function MovieRecommendations(
+  id: string,
+): Promise<MoviesHomepageResults | undefined> {
+  if (!isNumericId(id)) return undefined;
+
+  try {
+    return await tmdbRequest<MoviesHomepageResults>(
+      `movie/${id}/recommendations`,
+      {},
+      `tmdb:movie:${id}:recommendations`,
+      CACHE_TIER.SHORT,
     );
   } catch (error) {
     return undefined;
@@ -87,6 +110,10 @@ export async function MovieCredits({
   id: string;
   type: "credits" | "images";
 }) {
+  if (!isNumericId(id)) {
+    return type === "credits" ? EMPTY_CREDITS : EMPTY_IMAGES;
+  }
+
   try {
     if (type === "credits") {
       return await tmdbRequest<TVCredits>(
@@ -107,74 +134,3 @@ export async function MovieCredits({
     return type === "credits" ? EMPTY_CREDITS : EMPTY_IMAGES;
   }
 }
-
-export const FlixHQResultsHandler = async ({
-  movieId,
-}: {
-  movieId: string;
-}) => {
-  const url = `${CONSUMET}/meta/tmdb/info/${movieId}?type=movie`;
-  const data: FlixHQResults = await fetchJsonWithRetry<FlixHQResults>(url, {
-    revalidate: CACHE_DURATION,
-    context: `flixhq:movie-info:${movieId}`,
-  });
-  let { id, episodeId, title, cover } = data;
-
-  let subtitles: NonNullable<FlixHQMovieLinks["subtitles"]> = [];
-  let headers = "";
-  let movieLink: NonNullable<FlixHQMovieLinks["sources"]>[number] | undefined;
-  try {
-    const linksData: FlixHQMovieLinks =
-      await fetchJsonWithRetry<FlixHQMovieLinks>(
-        `${CONSUMET}/meta/tmdb/watch/${episodeId}?id=${id}`,
-        {
-          revalidate: CACHE_DURATION,
-          context: `flixhq:movie-watch:${movieId}`,
-        },
-      );
-
-    subtitles = linksData.subtitles || [];
-    headers = linksData.headers?.Referer || "";
-
-    movieLink = linksData.sources?.find(
-      (element) => element.quality === "auto",
-    );
-  } catch (error) {
-    subtitles = [];
-    headers = "";
-    movieLink = undefined;
-  }
-
-  let link2, link3;
-  try {
-    const vidccLinks: VidSrcCCLinks = await fetchJsonWithRetry<VidSrcCCLinks>(
-      `${VIDSRC_CC}/vidsrc/${movieId}`,
-      {
-        revalidate: CACHE_DURATION,
-        context: `vidsrc:movie:${movieId}`,
-      },
-    );
-
-    if (vidccLinks.source2?.data) {
-      link2 = vidccLinks.source2.data.source;
-    }
-    if (vidccLinks.source1?.data) {
-      const tempLink = vidccLinks.source1.data.source;
-      if (tempLink != movieLink?.url) {
-        link3 = tempLink;
-      }
-    }
-  } catch (error) {
-    link2 = undefined;
-    link3 = undefined;
-  }
-  return {
-    movieLink,
-    subtitles,
-    title,
-    cover,
-    link2,
-    link3,
-    headers,
-  };
-};

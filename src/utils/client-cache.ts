@@ -21,6 +21,9 @@ export function clientFetch<T>(
   if (existing) return Promise.resolve(existing.data as T);
 
   return fetcher().then((data) => {
+    // Don't cache failures/empty responses so they can retry later
+    if (data === undefined || data === null) return data;
+
     if (cache.size >= MAX_SIZE) {
       const first = cache.keys().next().value;
       if (first !== undefined) cache.delete(first);
@@ -28,8 +31,4 @@ export function clientFetch<T>(
     cache.set(key, { data, ts: Date.now() });
     return data;
   });
-}
-
-export function clientCacheClear() {
-  cache.clear();
 }

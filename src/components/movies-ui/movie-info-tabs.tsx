@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import { tmdbImageUrl } from "@/lib/tmdb-image";
 
 const MoreMovieInfo = async ({
   data,
@@ -21,7 +22,7 @@ const MoreMovieInfo = async ({
   images_data,
 }: {
   data: MovieInfoType | null;
-  recommendation_data: MoviesHomepageResults | null;
+  recommendation_data?: MoviesHomepageResults | null;
   cast_data: TVCredits;
   images_data: TVImages;
 }) => {
@@ -118,7 +119,7 @@ const MoreMovieInfo = async ({
                   <p className="text-sm text-muted-foreground italic">Download this movie for offline viewing in high quality.</p>
                   </div>
                   <Link
-                    href={`https://dl.vidsrc.vip/movie/${data.id}`}
+                    href={`https://vidvault.ru/movie/${data.id}`}
                     target="_blank"
                   >
                     <Button size="lg" className="font-black uppercase tracking-widest shadow-xl group">
@@ -186,11 +187,7 @@ const MoreMovieInfo = async ({
                 <div key={index} className="group relative">
                    <div className="aspect-[4/5] relative rounded-2xl overflow-hidden border border-border/50 shadow-lg group-hover:shadow-2xl transition-all duration-500">
                       <Image
-                        src={
-                          item.profile_path
-                            ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/original${item.profile_path}`
-                            : "/placeholder.svg"
-                        }
+                        src={tmdbImageUrl(item.profile_path)}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
                         alt={item.name || "Cast member"}
@@ -226,11 +223,7 @@ const MoreMovieInfo = async ({
                   images_data.backdrops.map((item, index) => (
                     <div className="relative w-[380px] aspect-video flex-shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-border/40 group cursor-pointer" key={index}>
                       <Image
-                        src={
-                          item.file_path
-                            ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/original${item.file_path}`
-                            : "/placeholder.svg"
-                        }
+                        src={tmdbImageUrl(item.file_path)}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         alt="Backdrop"
@@ -261,11 +254,7 @@ const MoreMovieInfo = async ({
                   images_data.posters.map((item, index) => (
                     <div className="relative w-50 aspect-2/3 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-border/40 group cursor-pointer" key={index}>
                       <Image
-                        src={
-                          item.file_path
-                            ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/original${item.file_path}`
-                            : "/placeholder.svg"
-                        }
+                        src={tmdbImageUrl(item.file_path)}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         alt="Poster"

@@ -99,7 +99,7 @@ interface TVResults {
   original_language?: string;
   genre_ids?: number[];
   popularity?: number;
-  first_air_date?: Date;
+  first_air_date?: string;
   vote_average?: number;
   vote_count?: number;
   origin_country?: string[];
@@ -114,13 +114,13 @@ export interface TVInfo {
   backdrop_path?: string;
   created_by?: any[];
   episode_run_time?: number[];
-  first_air_date?: Date;
+  first_air_date?: string;
   genres?: TVGenre[];
   homepage?: string;
   id?: number;
   in_production?: boolean;
   languages?: string[];
-  last_air_date?: Date;
+  last_air_date?: string;
   last_episode_to_air?: LastEpisodeToAir;
   name?: string;
   next_episode_to_air?: null;
@@ -155,7 +155,7 @@ interface LastEpisodeToAir {
   overview?: string;
   vote_average?: number;
   vote_count?: number;
-  air_date?: Date;
+  air_date?: string;
   episode_number?: number;
   episode_type?: string;
   production_code?: string;
@@ -178,7 +178,7 @@ interface TVProductionCountry {
 }
 
 interface Season {
-  air_date?: Date;
+  air_date?: string;
   episode_count?: number;
   id?: number;
   name?: string;
@@ -251,7 +251,7 @@ interface Backdrop {
 
 export interface TVSeasonInfo {
   _id?: string;
-  air_date?: Date;
+  air_date?: string;
   episodes?: TVEpisode[];
   name?: string;
   overview?: string;
@@ -262,7 +262,7 @@ export interface TVSeasonInfo {
 }
 
 interface TVEpisode {
-  air_date?: Date;
+  air_date?: string;
   episode_number?: number;
   episode_type?: string;
   id?: number;
@@ -306,7 +306,7 @@ enum TVDepartment {
 }
 
 export interface TVEpisodeInfo {
-  air_date?: Date;
+  air_date?: string;
   crew?: any[];
   episode_number?: number;
   guest_stars?: TVGuestStar[];
@@ -333,84 +333,4 @@ interface TVGuestStar {
   original_name?: string;
   popularity?: number;
   profile_path?: string;
-}
-
-export interface FlixHQResults {
-  id?: string;
-  title?: string;
-  episodeId?: string;
-  translations?: FlixHQTranslation[];
-  image?: string;
-  cover?: string;
-  logos?: Logo[];
-  type?: FlixHQType;
-  rating?: number;
-  releaseDate?: Date;
-  description?: string;
-  genres?: string[];
-  duration?: number;
-  directors?: string[];
-  writers?: any[];
-  actors?: string[];
-  trailer?: FlixHQTrailer;
-  mappings?: Mappings;
-  similar?: FlixHQRecommendation[];
-  recommendations?: FlixHQRecommendation[];
-}
-
-interface Logo {
-  url?: string;
-  aspectRatio?: number;
-  width?: number;
-}
-
-interface Mappings {
-  imdb?: string;
-  tmdb?: number;
-}
-
-interface FlixHQRecommendation {
-  id?: number;
-  title?: string;
-  image?: string;
-  type?: FlixHQType;
-  rating?: number;
-  releaseDate?: Date;
-}
-
-enum FlixHQType {
-  Movie = "Movie",
-}
-
-interface FlixHQTrailer {
-  id?: string;
-  site?: string;
-  url?: string;
-}
-
-interface FlixHQTranslation {
-  description?: string;
-  language?: string;
-  title?: string;
-}
-
-export interface FlixHQMovieLinks {
-  headers?: FlixHQHeaders;
-  sources?: FlixHQSource[];
-  subtitles?: FlixHQSubtitle[];
-}
-
-interface FlixHQHeaders {
-  Referer?: string;
-}
-
-interface FlixHQSource {
-  url?: string;
-  quality?: string;
-  isM3U8?: boolean;
-}
-
-interface FlixHQSubtitle {
-  url?: string;
-  lang?: string;
 }

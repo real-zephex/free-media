@@ -31,7 +31,6 @@ import {
   getAllHistory,
   removeFromHistory,
   saveAllHistory,
-  getWatchHistoryStats,
   getSeriesProgress,
   getPlaybackProgress,
   WatchHistoryItem,
@@ -67,6 +66,7 @@ export default function WatchHistoryPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHoverMenu, setShowHoverMenu] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
+  const countsFetchedRef = React.useRef<Set<number>>(new Set());
 
   useEffect(() => {
     const raw = getAllHistory();
@@ -77,7 +77,77 @@ export default function WatchHistoryPage() {
     setHistory(migrated);
   }, []);
 
-  const stats = useMemo(() => getWatchHistoryStats(), [history]);
+  useEffect(() => {
+    setDisplayCount(20);
+  }, [activeTab, searchQuery, sortBy]);
+
+  useEffect(() => {
+    const missing = history.filter(
+      (i) =>
+        i.type === "TV" &&
+        !i.seasonEpisodeCounts &&
+        !countsFetchedRef.current.has(i.id),
+    );
+    if (missing.length === 0) return;
+
+    let cancelled = false;
+
+    (async () => {
+      const updates = new Map<number, Record<string, number>>();
+      await Promise.all(
+        missing.map(async (item) => {
+          countsFetchedRef.current.add(item.id);
+          try {
+            const info = (await clientFetch(`hover:tv:${item.id}`, () =>
+              InfoImagesCreditsTV({ type: "info", id: item.id }),
+            )) as TVInfo | undefined;
+            if (info?.seasons) {
+              const counts: Record<string, number> = {};
+              info.seasons.forEach((s) => {
+                if (s.season_number != null) {
+                  counts[String(s.season_number)] = s.episode_count ?? 0;
+                }
+              });
+              updates.set(item.id, counts);
+            }
+          } catch {
+            // ignore — progress falls back to episode flags only
+          }
+        }),
+      );
+      if (cancelled || updates.size === 0) return;
+
+      setHistory((prev) =>
+        prev.map((i) =>
+          updates.has(i.id)
+            ? { ...i, seasonEpisodeCounts: updates.get(i.id) }
+            : i,
+        ),
+      );
+      saveAllHistory(
+        getAllHistory().map((i) =>
+          updates.has(i.id)
+            ? { ...i, seasonEpisodeCounts: updates.get(i.id) }
+            : i,
+        ),
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [history]);
+
+  const stats = useMemo(
+    () => ({
+      watching: history.filter((i) => i.watch_status === "Watching").length,
+      planToWatch: history.filter((i) => i.watch_status === "Plan to Watch")
+        .length,
+      completed: history.filter((i) => i.watch_status === "Completed").length,
+      total: history.length,
+    }),
+    [history],
+  );
 
   const filtered = useMemo(() => {
     let items = [...history];
@@ -386,7 +456,6 @@ function RichHistoryCard({
   onHoverLeave: () => void;
   onHoverMove: (e: React.MouseEvent) => void;
 }) {
-  const router = useRouter();
   const prog =
     item.type === "TV"
       ? getSeriesProgress(item.id)

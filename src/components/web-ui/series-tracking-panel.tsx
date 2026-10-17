@@ -13,6 +13,7 @@ import {
   storeIntoLocal,
   watchStatusRetriever,
   getSeriesProgress,
+  getWatchHistoryItem,
 } from "@/utils/localStorage";
 import TrackingProgressBar from "./tracking-progress-bar";
 import { Play, BarChart3 } from "lucide-react";
@@ -58,6 +59,7 @@ const SeriesTrackingPanel: React.FC<SeriesTrackingPanelProps> = ({
         overview,
       },
       status: value as "Completed" | "Plan to Watch" | "Watching",
+      seasonEpisodeCounts,
     });
     if (ok) {
       setStatus(value);
@@ -65,9 +67,7 @@ const SeriesTrackingPanel: React.FC<SeriesTrackingPanelProps> = ({
   };
 
   const handleResume = () => {
-    const item = (
-      JSON.parse(localStorage.getItem("watchHistory") || "[]") as any[]
-    ).find((i: any) => i.id === seriesId);
+    const item = getWatchHistoryItem(seriesId);
     const season = item?.lastSeason ?? 1;
     const episode = item?.lastEpisode ?? 1;
     router.push(`/web-series/watch/${season}/${episode}/${seriesId}`);
@@ -100,7 +100,7 @@ const SeriesTrackingPanel: React.FC<SeriesTrackingPanelProps> = ({
           )}
           <Select
             onValueChange={handleStatusChange}
-            value={status === "Not found" ? undefined : status}
+            value={status === "Not found" ? "" : status}
           >
             <SelectTrigger className="w-[170px] bg-card border-border/50 font-bold rounded-full">
               <SelectValue placeholder="Track Series" />

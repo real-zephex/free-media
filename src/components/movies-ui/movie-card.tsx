@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Star, Calendar, Play, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { MovieInfoType } from "@/utils/types";
+import { tmdbImageUrlAlt } from "@/lib/tmdb-image";
 
 interface MovieCardProps {
   movie: any; // Using any for flexibility with search/discover results
@@ -13,9 +13,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard = ({ movie, index = 0 }: MovieCardProps) => {
-  const posterUrl = movie.poster_path
-    ? `${process.env.NEXT_PUBLIC_PROXY_2}https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : "/placeholder.svg";
+  const posterUrl = tmdbImageUrlAlt(movie.poster_path, "w500");
 
   return (
     <motion.div

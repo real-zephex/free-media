@@ -20,34 +20,35 @@ Modern Next.js app for browsing movie and TV metadata with external playback emb
 
 ### Playback Embeds (used directly in UI)
 
-These are hard-coded iframe sources used in the current UI:
+These are hard-coded iframe sources used in the current UI (selectable via a dropdown on each player):
+
+**Movies** (`src/components/movies-ui/movie-players.tsx`):
 
 - `https://embedmaster.link/<redacted>/movie/{id}`
+- `https://vidsrc.buzz/embed/movie/{id}`
+- `https://vidfast.vc/movie/{id}`
+- `https://player.videasy.ws/embed/movie/{id}`
+- `https://www.2embed.stream/embed/movie/{id}`
+- `https://vixsrc.to/movie/{id}`
+- `https://cinesrc.st/embed/movie/{id}`
+- Download link: `https://vidvault.ru/movie/{id}`
+
+**Series** (`src/app/web-series/watch/[...slugs]/page.tsx`):
+
 - `https://embedmaster.link/<redacted>/tv/{seriesId}/{season}/{episode}`
-- `https://vidsrc.vip/embed/movie/{id}`
-- `https://vidsrc.vip/embed/tv/{seriesId}/{season}/{episode}`
-- `https://vidsrc.icu/embed/movie/{id}`
-- `https://vidsrc.icu/embed/tv/{seriesId}/{season}/{episode}`
-- Download link in series episode page: `https://dl.vidsrc.vip/tv/{seriesId}/{season}/{episode}`
+- `https://vidsrc.buzz/embed/tv/{seriesId}/{season}/{episode}`
+- `https://vidfast.vc/tv/{seriesId}/{season}/{episode}`
+- `https://player.videasy.ws/embed/tv/{seriesId}/{season}/{episode}`
+- `https://www.2embed.stream/embed/tv/{seriesId}/{season}/{episode}`
+- `https://player.embed-api.stream/?id={seriesId}&s={season}&e={episode}`
+- `https://vixsrc.to/tv/{seriesId}/{season}/{episode}`
+- Download link: `https://vidvault.to/tv/{seriesId}/{season}/{episode}`
 
-**Source files:**
-- Movies: `src/components/movies-ui/movie-players.tsx`
-- Series: `src/app/web-series/watch/[...slugs]/page.tsx`
+Both players share `src/components/embed-source-player.tsx`.
 
-### Optional Streaming Link Aggregation (present in code, not wired into UI)
+### Proxy note
 
-There are server utilities that can fetch HLS sources and subtitles, but the current pages do not call them. These are present in:
-
-- `src/utils/movie-requests/request.ts`
-- `src/utils/tv-requests/request.ts`
-
-They reference:
-
-- **Consumet API** (configured via `CONSUMET_API_URL`):
-  - `GET /meta/tmdb/info/{id}?type=movie|tv`
-  - `GET /meta/tmdb/watch/{episodeId}?id={tmdbId}`
-- **VidSrc link service** (hard-coded):
-  - `https://dramaflix-movielinks.vercel.app/vidsrc/{tmdbId}`
+When `NEXT_PUBLIC_PROXY` / `NEXT_PUBLIC_PROXY_2` are unset, image URLs point directly at `image.tmdb.org`. When set, they are prefixed with the proxy origin.
 
 ### Proxies (optional)
 
@@ -103,12 +104,6 @@ TMDB_API_KEY=your_tmdb_api_key_1,your_tmdb_api_key_2
 # Optional image proxies
 NEXT_PUBLIC_PROXY=https://your-image-proxy.example
 NEXT_PUBLIC_PROXY_2=https://your-image-proxy.example
-
-# Optional HLS proxy (used by custom players if wired in)
-NEXT_PUBLIC_M3U8_PROXY=https://your-m3u8-proxy.example
-
-# Optional streaming link aggregation (present in code, not wired in UI)
-CONSUMET_API_URL=https://your-consumet-api.example
 ```
 
 ## Scripts

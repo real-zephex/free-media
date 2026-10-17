@@ -14,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Monitor, CheckCheck } from "lucide-react";
+import { CheckCheck } from "lucide-react";
 import TrackingProgressBar from "./tracking-progress-bar";
 
 interface WebSeriesWatchStatusProps {
@@ -64,13 +63,14 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
           status: "Watching",
           season: seasonNum,
           episode: episodeNum,
+          seasonEpisodeCounts,
         });
         if (ok) {
           setWatchStatus("Watching");
           setAutoMarked(true);
         }
       }
-      markEpisodeWatched(seriesId, seasonNum, episodeNum, true);
+      markEpisodeWatched(seriesId, seasonNum, episodeNum, true, seasonEpisodeCounts);
     }, 30000);
 
     return () => {
@@ -94,12 +94,12 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
     if (ok) {
       setWatchStatus(value);
     } else {
-      alert("Error saving watch status. Please try again.");
+      console.error("Failed to save watch status");
     }
   }
 
   function handleMarkWatched() {
-    markEpisodeWatched(seriesId, seasonNum, episodeNum, true);
+    markEpisodeWatched(seriesId, seasonNum, episodeNum, true, seasonEpisodeCounts);
     setProgress((prev) => ({
       ...prev,
       watched: Math.min(prev.watched + 1, prev.total),
@@ -138,7 +138,7 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
         <div className="flex items-center gap-3">
           <Select
             onValueChange={handleStatusChange}
-            value={watchStatus === "Not found" ? undefined : watchStatus}
+            value={watchStatus === "Not found" ? "" : watchStatus}
           >
             <SelectTrigger className="w-[170px] bg-card border-border/50 font-bold rounded-full">
               <SelectValue placeholder="Track Series" />

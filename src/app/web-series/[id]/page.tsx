@@ -8,28 +8,45 @@ import SeasonAccordion from "@/components/web-ui/season-accordion";
 
 import Image from "next/image";
 import React from "react";
+import { notFound } from "next/navigation";
 
 interface Season {
   seasonNumber: number;
   seasonTitle: string;
 }
 
-const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
+const EMPTY_CREDITS: TVCredits = { cast: [], crew: [], id: 0 };
+const EMPTY_IMAGES: TVImages = { backdrops: [], logos: [], posters: [], id: 0 };
+
+const WebSeriesInfoPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const { id } = await params;
-  const seriesIdNum = parseInt(id);
+  if (!/^\d+$/.test(id)) notFound();
+  const seriesIdNum = parseInt(id, 10);
 
   const series_info: TVInfo = await InfoImagesCreditsTV({
     type: "info",
     id: seriesIdNum,
   });
-  const credits_data: TVCredits = await InfoImagesCreditsTV({
-    type: "credits",
-    id: seriesIdNum,
-  });
-  const images: TVImages = await InfoImagesCreditsTV({
-    type: "images",
-    id: seriesIdNum,
-  });
+  if (!series_info?.id) notFound();
+
+  let credits_data: TVCredits = EMPTY_CREDITS;
+  let images: TVImages = EMPTY_IMAGES;
+  try {
+    credits_data = await InfoImagesCreditsTV({
+      type: "credits",
+      id: seriesIdNum,
+    });
+    images = await InfoImagesCreditsTV({
+      type: "images",
+      id: seriesIdNum,
+    });
+  } catch (error) {
+    console.error("Error fetching series credits/images:", error);
+  }
 
   let tempSeasonInfo: Season[] = [];
   const seasonEpisodeCounts: Record<number, number> = {};
@@ -133,14 +150,17 @@ const WebSeriesInfoPage = async ({ params }: { params: { id: string } }) => {
 };
 
 export async function generateMetadata(
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
   try {
     const { id } = await params;
+    if (!/^\d+$/.test(id)) {
+      return { title: "Series Not Found" };
+    }
     const seriesInfo = (await InfoImagesCreditsTV({
       type: "info",
-      id: parseInt(id),
+      id: parseInt(id, 10),
     })) as TVInfo;
 
     if (!seriesInfo) {

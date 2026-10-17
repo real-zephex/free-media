@@ -8,6 +8,7 @@ export interface WatchHistoryItem {
   lastSeason?: number;
   lastEpisode?: number;
   episodes?: Record<string, Record<string, boolean>>;
+  seasonEpisodeCounts?: Record<string, number>;
   updatedAt?: number;
 }
 
@@ -21,6 +22,17 @@ function getAllHistory(): WatchHistoryItem[] {
 
 function saveAllHistory(history: WatchHistoryItem[]) {
   localStorage.setItem("watchHistory", JSON.stringify(history));
+}
+
+function normalizeCounts(
+  counts: Record<number, number> | Record<string, number> | undefined,
+): Record<string, number> | undefined {
+  if (!counts) return undefined;
+  const normalized: Record<string, number> = {};
+  for (const [key, value] of Object.entries(counts)) {
+    normalized[String(key)] = value;
+  }
+  return normalized;
 }
 
 function migrateItem(item: WatchHistoryItem): WatchHistoryItem {
@@ -45,10 +57,13 @@ function migrateItem(item: WatchHistoryItem): WatchHistoryItem {
     const eKey = String(patched.lastEpisode ?? 1);
     patched.episodes[sKey] = patched.episodes[sKey] ?? {};
     patched.episodes[sKey][eKey] = true;
+    if (!patched.updatedAt) {
+      patched.updatedAt = Date.now();
+    }
     return patched;
   }
   if (!item.updatedAt) {
-    item.updatedAt = Date.now();
+    return { ...item, updatedAt: Date.now() };
   }
   return item;
 }
@@ -59,18 +74,21 @@ function storeIntoLocal({
   type,
   season,
   episode,
+  seasonEpisodeCounts,
 }: {
   movieData: { id: any; title: string; poster_path: string | null; overview?: string };
   status: "Completed" | "Plan to Watch" | "Watching";
   type: "MOVIE" | "TV";
   season?: number;
   episode?: number;
+  seasonEpisodeCounts?: Record<number, number> | Record<string, number>;
 }) {
   try {
     const parsed = getAllHistory();
     const existingIndex = parsed.findIndex(
       (item) => item.id === movieData.id,
     );
+    const counts = normalizeCounts(seasonEpisodeCounts);
 
     if (existingIndex !== -1) {
       const item = migrateItem(parsed[existingIndex]);
@@ -83,6 +101,12 @@ function storeIntoLocal({
         if (season !== undefined && episode !== undefined) {
           item.lastSeason = season;
           item.lastEpisode = episode;
+        }
+        if (counts) {
+          item.seasonEpisodeCounts = {
+            ...item.seasonEpisodeCounts,
+            ...counts,
+          };
         }
       }
       parsed[existingIndex] = item;
@@ -98,6 +122,9 @@ function storeIntoLocal({
       };
       if (type === "TV") {
         item.episodes = {};
+        if (counts) {
+          item.seasonEpisodeCounts = counts;
+        }
         if (season !== undefined && episode !== undefined) {
           item.lastSeason = season;
           item.lastEpisode = episode;
@@ -134,6 +161,7 @@ function markEpisodeWatched(
   season: number,
   episode: number,
   watched: boolean,
+  seasonEpisodeCounts?: Record<number, number> | Record<string, number>,
 ) {
   const parsed = getAllHistory();
   const idx = parsed.findIndex((i) => i.id === Number(seriesId));
@@ -148,6 +176,10 @@ function markEpisodeWatched(
   item.lastSeason = season;
   item.lastEpisode = episode;
   item.updatedAt = Date.now();
+  const counts = normalizeCounts(seasonEpisodeCounts);
+  if (counts) {
+    item.seasonEpisodeCounts = { ...item.seasonEpisodeCounts, ...counts };
+  }
   parsed[idx] = item;
   saveAllHistory(parsed);
 }
@@ -166,16 +198,19 @@ function isEpisodeWatched(
 
 function getSeriesProgress(
   seriesId: number | string,
-  seasonEpisodeCounts?: Record<number, number>,
+  seasonEpisodeCounts?: Record<number, number> | Record<string, number>,
 ): { watched: number; total: number; percent: number } {
   const item = getWatchHistoryItem(seriesId);
   if (!item?.episodes) return { watched: 0, total: 0, percent: 0 };
 
+  const counts =
+    normalizeCounts(seasonEpisodeCounts) ?? item.seasonEpisodeCounts;
+
   let watched = 0;
   let total = 0;
 
-  if (seasonEpisodeCounts) {
-    for (const [sStr, count] of Object.entries(seasonEpisodeCounts)) {
+  if (counts && Object.keys(counts).length > 0) {
+    for (const [sStr, count] of Object.entries(counts)) {
       total += count;
       const seasonEpisodes = item.episodes[sStr];
       if (seasonEpisodes) {
@@ -231,29 +266,10 @@ function getPlaybackProgress(
   }
 }
 
-function getPlaybackProgressPerEpisode(
-  seriesId: number | string,
-  season: number,
-  episode: number,
-): { currentTime: number; playbackPercentage: number } | null {
-  const key = `${seriesId}-S${season}E${episode}`;
-  return getPlaybackProgress(key);
-}
-
 function removeFromHistory(id: number | string) {
   const parsed = getAllHistory();
   const filtered = parsed.filter((i) => i.id !== Number(id));
   saveAllHistory(filtered);
-}
-
-function getWatchHistoryStats() {
-  const parsed = getAllHistory();
-  return {
-    watching: parsed.filter((i) => i.watch_status === "Watching").length,
-    planToWatch: parsed.filter((i) => i.watch_status === "Plan to Watch").length,
-    completed: parsed.filter((i) => i.watch_status === "Completed").length,
-    total: parsed.length,
-  };
 }
 
 export {
@@ -267,8 +283,6 @@ export {
   getSeriesProgress,
   getSeasonProgress,
   getPlaybackProgress,
-  getPlaybackProgressPerEpisode,
   removeFromHistory,
-  getWatchHistoryStats,
   migrateItem,
 };

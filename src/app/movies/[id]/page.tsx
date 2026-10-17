@@ -1,10 +1,15 @@
 import MoviePlayer from "@/components/movies-ui/movie-players";
-import { MovieInfo, MovieCredits } from "@/utils/movie-requests/request";
+import {
+  MovieInfo,
+  MovieCredits,
+  MovieRecommendations,
+} from "@/utils/movie-requests/request";
 import MoreMovieInfo from "@/components/movies-ui/movie-info-tabs";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-
+import { notFound } from "next/navigation";
+import { tmdbImageUrl } from "@/lib/tmdb-image";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -33,11 +38,7 @@ export async function generateMetadata(
         description: data.overview || `Watch ${data.title} on Dramaflix`,
         images: [
           {
-            url: data.poster_path
-              ? `${process.env.NEXT_PUBLIC_PROXY
-              }https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path
-              }`
-              : "/placeholder.svg",
+            url: tmdbImageUrl(data.backdrop_path || data.poster_path),
             width: 800,
             height: 600,
             alt: `${data.title} poster`,
@@ -57,11 +58,11 @@ const MovieInfoPage = async ({ params }: Props) => {
   const { id } = await params;
 
   const data = await MovieInfo(id);
-  const recommendations: any = await MovieInfo(id, true);
+  const recommendations = await MovieRecommendations(id);
   const movieCast = await MovieCredits({ id, type: "credits" });
   const imagesData = await MovieCredits({ id, type: "images" });
 
-  if (!data) return null;
+  if (!data) notFound();
 
   return (
     <main className="min-h-screen pb-20">

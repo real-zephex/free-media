@@ -34,7 +34,12 @@ export default async function Home() {
     // Fallbacks will just render empty marquees safely
   }
 
-  const allPosters = [...trendingMoviesImages, ...trendingSeriesImages].sort(() => 0.5 - Math.random());
+  // Deterministic interleave of movies + series (keeps render pure)
+  const allPosters: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    if (trendingMoviesImages[i]) allPosters.push(trendingMoviesImages[i]);
+    if (trendingSeriesImages[i]) allPosters.push(trendingSeriesImages[i]);
+  }
 
   return (
     <main className="relative flex flex-col min-h-screen bg-background overflow-x-hidden">

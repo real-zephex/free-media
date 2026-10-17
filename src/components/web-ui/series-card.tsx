@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Star, Calendar, Play, Info, Tv } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { tmdbImageUrlAlt } from "@/lib/tmdb-image";
 
 interface SeriesCardProps {
   series: any;
@@ -12,9 +13,7 @@ interface SeriesCardProps {
 }
 
 export const SeriesCard = ({ series, index = 0 }: SeriesCardProps) => {
-  const posterUrl = series.poster_path
-    ? `${process.env.NEXT_PUBLIC_PROXY_2}https://image.tmdb.org/t/p/w500${series.poster_path}`
-    : "/placeholder.svg";
+  const posterUrl = tmdbImageUrlAlt(series.poster_path, "w500");
 
   return (
     <motion.div

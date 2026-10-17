@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { tmdbImageUrl } from "@/lib/tmdb-image";
 
 const SeriesInfoTabs = async ({
   data,
@@ -117,16 +118,10 @@ const SeriesInfoTabs = async ({
                 <Card key={index} className="overflow-hidden border-none bg-muted/30 hover:bg-muted/50 transition-all hover:-translate-y-1 group border border-border/50">
                   <div className="relative aspect-[3/4]">
                     <Image
-                      src={
-                        item.profile_path
-                          ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/w185${item.profile_path}`
-                          : "/placeholder.svg"
-                      }
+                      src={tmdbImageUrl(item.profile_path, "w185")}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                       alt={item.name || "Cast Member"}
-                      placeholder="blur"
-                      blurDataURL="/placeholder.svg"
                     />
                   </div>
                   <CardContent className="p-3">
@@ -153,11 +148,7 @@ const SeriesInfoTabs = async ({
                   artwork.backdrops.map((item, index) => (
                     <div className="relative w-[320px] aspect-video flex-shrink-0 rounded-xl overflow-hidden shadow-xl border border-border/50 group" key={index}>
                       <Image
-                        src={
-                          item.file_path
-                            ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/w780${item.file_path}`
-                            : "/placeholder.svg"
-                        }
+                        src={tmdbImageUrl(item.file_path, "w780")}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                         alt="Backdrop"
@@ -184,11 +175,7 @@ const SeriesInfoTabs = async ({
                   artwork.posters.map((item, index) => (
                     <div className="relative w-[180px] aspect-[2/3] flex-shrink-0 rounded-xl overflow-hidden shadow-xl border border-border/50 group" key={index}>
                       <Image
-                        src={
-                          item.file_path
-                            ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/w500${item.file_path}`
-                            : "/placeholder.svg"
-                        }
+                        src={tmdbImageUrl(item.file_path, "w500")}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                         alt="Poster"

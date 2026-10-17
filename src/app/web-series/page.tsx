@@ -5,10 +5,11 @@ import { Metadata } from "next";
 import WebHomepageCards from "@/components/web-ui/homepage-cards";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Play, Info, TrendingUp, Star, Calendar, ArrowRight, Tv } from "lucide-react";
+import { Play, Info, TrendingUp, Star, Calendar, ArrowRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { tmdbImageUrl } from "@/lib/tmdb-image";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const title = "TV Shows & Web Series - Dramaflix";
     const description = "Discover and watch the best TV shows and web series on Dramaflix.";
     const imageUrl = featuredShow?.backdrop_path
-      ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/original${featuredShow.backdrop_path}`
+      ? tmdbImageUrl(featuredShow.backdrop_path)
       : "/placeholder.svg";
 
     return {

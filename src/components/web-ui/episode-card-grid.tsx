@@ -9,6 +9,7 @@ import {
   isEpisodeWatched,
   markEpisodeWatched,
 } from "@/utils/localStorage";
+import { tmdbImageUrl } from "@/lib/tmdb-image";
 interface EpisodeItem {
   episode_number?: number;
   name?: string;
@@ -93,14 +94,8 @@ const SeasonEpisodeGrid: React.FC<SeasonEpisodeGridProps> = ({
             >
               <div className="relative aspect-video overflow-hidden">
                 <Image
-                  src={
-                    item.still_path
-                      ? `${process.env.NEXT_PUBLIC_PROXY}https://image.tmdb.org/t/p/original${item.still_path}`
-                      : "/placeholder.svg"
-                  }
+                  src={tmdbImageUrl(item.still_path)}
                   fill
-                  placeholder="blur"
-                  blurDataURL="/placeholder.svg"
                   alt={`Episode ${epNum}`}
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />

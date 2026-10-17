@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { watchStatusRetriever } from "@/utils/localStorage";
 import { Badge } from "@/components/ui/badge";
-import { Play, Eye, CheckCheck, BookmarkPlus } from "lucide-react";
+import { Eye, CheckCheck, BookmarkPlus } from "lucide-react";
 
 interface SeriesHeroStatusProps {
   seriesId: number;

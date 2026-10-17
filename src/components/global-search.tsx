@@ -58,7 +58,7 @@ const Search = () => {
     [title],
   );
 
-  useHotkeys("ctrl+k", (event) => {
+  useHotkeys(["ctrl+k", "meta+k"], (event) => {
     event.preventDefault();
     setIsOpen(true);
   });
