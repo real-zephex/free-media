@@ -2,7 +2,9 @@ const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
 function withProxy(url: string, proxy: string | undefined): string {
   if (!proxy) return url;
-  return `${proxy.replace(/\/+$/, "")}/${url}`;
+  // Proxy env is a raw prefix (e.g. "https://proxy.example/fetch?url=") —
+  // concatenate directly, never inject a separator.
+  return `${proxy}${url}`;
 }
 
 export function tmdbImageUrl(
