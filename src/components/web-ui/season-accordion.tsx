@@ -50,7 +50,7 @@ const SeasonAccordion: React.FC<SeasonAccordionProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <p className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-2xl">
+      <p className="text-center py-12 text-[#94A3B8] border border-dashed border-white/10 rounded-xl">
         No seasons found
       </p>
     );
@@ -62,19 +62,21 @@ const SeasonAccordion: React.FC<SeasonAccordionProps> = ({
       collapsible
       value={accordionValue}
       onValueChange={handleValueChange}
-      className="w-full space-y-2 mt-8"
+      className="w-full space-y-3"
     >
       {data.map((item, index) => (
         <AccordionItem
           key={index}
           value={`season-${item.seasonNumber}`}
-          className="border border-border/50 bg-muted/20 rounded-2xl px-6 overflow-hidden data-[state=open]:bg-muted/30 transition-all"
+          className="border border-white/[0.08] bg-[#12151F] rounded-xl px-5 overflow-hidden data-[state=open]:border-white/20 transition-all shadow-md"
         >
-          <AccordionTrigger className="hover:no-underline py-5">
-            <div className="flex items-center gap-3 w-full">
-              <div className="flex items-center gap-3">
-                <Layers className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-xl font-black italic tracking-tighter uppercase">
+          <AccordionTrigger className="hover:no-underline py-4">
+            <div className="flex items-center gap-3 w-full pr-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-md bg-[#00A8E1]/10 text-[#00A8E1]">
+                  <Layers className="h-4 w-4 shrink-0" />
+                </div>
+                <span className="text-base sm:text-lg font-display font-bold text-white tracking-tight">
                   {item.seasonTitle}
                 </span>
               </div>
@@ -87,15 +89,15 @@ const SeasonAccordion: React.FC<SeasonAccordionProps> = ({
               />
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pb-6">
+          <AccordionContent className="pb-5 pt-2">
             {openedSeasons.has(item.seasonNumber) ? (
               <LazySeasonGrid
                 seriesId={seriesId}
                 seasonNumber={item.seasonNumber}
               />
             ) : (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-[#94A3B8]" />
               </div>
             )}
           </AccordionContent>

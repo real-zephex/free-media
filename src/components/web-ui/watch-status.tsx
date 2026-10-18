@@ -111,25 +111,22 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-5 md:p-6 space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-primary/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
               Now Playing
             </span>
             {autoMarked && (
-              <Badge
-                variant="outline"
-                className="text-[9px] font-black uppercase bg-green-500/10 text-green-400 border-green-500/30"
-              >
+              <span className="text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
                 Auto-tracked
-              </Badge>
+              </span>
             )}
           </div>
-          <h4 className="font-black text-xl italic tracking-tight leading-none">
+          <h4 className="font-display font-bold text-lg md:text-xl text-white">
             {title}{" "}
-            <span className="text-muted-foreground text-sm font-bold ml-2">
+            <span className="text-[#94A3B8] text-sm font-semibold ml-2">
               S{season} E{episode}
             </span>
           </h4>
@@ -140,17 +137,17 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
             onValueChange={handleStatusChange}
             value={watchStatus === "Not found" ? "" : watchStatus}
           >
-            <SelectTrigger className="w-[170px] bg-card border-border/50 font-bold rounded-full">
-              <SelectValue placeholder="Track Series" />
+            <SelectTrigger className="w-[160px] bg-[#090A10] border-white/10 font-semibold text-xs text-white rounded-md h-9">
+              <SelectValue placeholder="Add to List" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Watching" className="font-bold">
+            <SelectContent className="bg-[#12151F] border-white/10 text-white rounded-md shadow-2xl">
+              <SelectItem value="Watching" className="text-xs font-semibold cursor-pointer">
                 Watching
               </SelectItem>
-              <SelectItem value="Completed" className="font-bold">
+              <SelectItem value="Completed" className="text-xs font-semibold cursor-pointer">
                 Completed
               </SelectItem>
-              <SelectItem value="Plan to Watch" className="font-bold">
+              <SelectItem value="Plan to Watch" className="text-xs font-semibold cursor-pointer">
                 Plan to Watch
               </SelectItem>
             </SelectContent>
@@ -158,10 +155,10 @@ const WebSeriesWatchStatus: React.FC<WebSeriesWatchStatusProps> = ({
 
           <button
             onClick={handleMarkWatched}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-colors text-xs font-black uppercase tracking-wider"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 transition-colors text-xs font-bold uppercase tracking-wider cursor-pointer"
           >
             <CheckCheck className="h-3.5 w-3.5" />
-            Done
+            <span>Mark Watched</span>
           </button>
         </div>
       </div>

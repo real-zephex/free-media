@@ -16,6 +16,7 @@ import {
   BookmarkPlus,
   Eye,
   Film,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,13 +45,13 @@ import { clientFetch } from "@/utils/client-cache";
 const TABS = ["All", "Watching", "Plan to Watch", "Completed"] as const;
 
 const statusIcons: Record<string, React.ReactNode> = {
-  Watching: <Eye className="h-3.5 w-3.5" />,
-  Completed: <CheckCheck className="h-3.5 w-3.5" />,
-  "Plan to Watch": <BookmarkPlus className="h-3.5 w-3.5" />,
+  Watching: <Eye className="h-3.5 w-3.5 text-emerald-400" />,
+  Completed: <CheckCheck className="h-3.5 w-3.5 text-blue-400" />,
+  "Plan to Watch": <BookmarkPlus className="h-3.5 w-3.5 text-amber-400" />,
 };
 
 const statusColors: Record<string, string> = {
-  Watching: "text-green-400 border-green-500/30 bg-green-500/10",
+  Watching: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
   Completed: "text-blue-400 border-blue-500/30 bg-blue-500/10",
   "Plan to Watch": "text-amber-400 border-amber-500/30 bg-amber-500/10",
 };
@@ -111,7 +112,7 @@ export default function WatchHistoryPage() {
               updates.set(item.id, counts);
             }
           } catch {
-            // ignore — progress falls back to episode flags only
+            // ignore
           }
         }),
       );
@@ -253,75 +254,49 @@ export default function WatchHistoryPage() {
   };
 
   return (
-    <main className="container mx-auto p-4 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic">
-            Watch <span className="text-primary">History</span>
+    <main className="min-h-screen pt-24 pb-20 px-4 sm:px-6 md:px-10 lg:px-16 max-w-7xl mx-auto space-y-8 bg-background text-foreground">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="h-3.5 w-3.5" />
+            Continue Watching & Library
+          </div>
+          <h1 className="text-3xl md:text-4xl font-display font-black text-white tracking-tight">
+            Watch History
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Track your progress across movies and series
-          </p>
         </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+        {/* Quick Stats Pills */}
+        <div className="flex items-center gap-2">
           {([
-            { key: "watching", label: "Watching", icon: <Eye className="h-4 w-4" />, color: "text-green-400" },
-            { key: "planToWatch", label: "Plan to Watch", icon: <BookmarkPlus className="h-4 w-4" />, color: "text-amber-400" },
-            { key: "completed", label: "Completed", icon: <CheckCheck className="h-4 w-4" />, color: "text-blue-400" },
+            { key: "watching", label: "Watching", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+            { key: "planToWatch", label: "Plan to Watch", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+            { key: "completed", label: "Completed", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
           ] as const).map((stat) => (
-            <div
+            <button
               key={stat.key}
-              className="bg-muted/20 border border-border/50 rounded-2xl p-3 text-center hover:bg-muted/30 transition-colors cursor-pointer"
               onClick={() => setActiveTab(stat.label)}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${stat.color} hover:scale-105`}
             >
-              <div className={`flex justify-center mb-1 ${stat.color}`}>
-                {stat.icon}
-              </div>
-              <div className="text-xl font-black">{stats[stat.key]}</div>
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                {stat.label}
-              </div>
-            </div>
+              <span className="font-black mr-1.5">{stats[stat.key]}</span>
+              <span className="hidden sm:inline font-semibold">{stat.label}</span>
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* Search + Sort */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search your tracked titles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-muted/20 border-border/50 rounded-xl font-medium"
-            />
-          </div>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px] bg-muted/20 border-border/50 rounded-xl font-bold">
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="updated">Recently Updated</SelectItem>
-              <SelectItem value="title">Title A-Z</SelectItem>
-              <SelectItem value="progress">Progress %</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex bg-muted/30 p-1 rounded-2xl max-w-lg mx-auto">
+      {/* Search, Sort, and Tabs Rail */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Category Tabs */}
+        <div className="flex bg-[#12151F] p-1 rounded-lg border border-white/10 w-full md:w-auto overflow-x-auto no-scrollbar">
           {TABS.map((tab) => (
             <button
               key={tab}
-              className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${
+              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab
-                  ? "bg-background shadow-sm text-foreground border border-border/50"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-white shadow-md"
+                  : "text-[#94A3B8] hover:text-white"
               }`}
               onClick={() => setActiveTab(tab)}
             >
@@ -330,80 +305,104 @@ export default function WatchHistoryPage() {
           ))}
         </div>
 
-        {/* Grid */}
-        {filtered.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed rounded-3xl border-muted">
-            <Film className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground text-lg font-medium">
-              {searchQuery
-                ? "No matches found"
-                : "Nothing here yet"}
-            </p>
-            {!searchQuery && (
-              <p className="text-muted-foreground/60 text-sm mt-1">
-                Start tracking movies & series to see them here
-              </p>
-            )}
+        {/* Search & Sort Controls */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94A3B8]" />
+            <Input
+              placeholder="Filter titles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-[#12151F] border-white/10 rounded-lg text-xs font-medium text-white placeholder:text-[#94A3B8]/60 focus-visible:ring-1 focus-visible:ring-primary"
+            />
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              <AnimatePresence mode="popLayout">
-                {displayed.map((item) => (
-                  <RichHistoryCard
-                    key={item.id}
-                    item={item}
-                    onDelete={handleDelete}
-                    onResume={handleResume}
-                    onStatusChange={handleStatusChange}
-                    onHoverEnter={handleMouseEnter}
-                    onHoverLeave={handleMouseLeave}
-                    onHoverMove={handleMouseMove}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-            {displayCount < filtered.length && (
-              <div className="text-center mt-6">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full font-bold px-8"
-                  onClick={() => setDisplayCount((c) => c + 20)}
-                >
-                  Load More ({filtered.length - displayCount} remaining)
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[150px] h-9 bg-[#12151F] border-white/10 text-white font-semibold text-xs rounded-lg">
+              <ArrowUpDown className="h-3.5 w-3.5 mr-1 text-[#94A3B8]" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#12151F] border-white/10 text-white rounded-lg shadow-2xl">
+              <SelectItem value="updated" className="text-xs font-semibold cursor-pointer">Recently Updated</SelectItem>
+              <SelectItem value="title" className="text-xs font-semibold cursor-pointer">Title A-Z</SelectItem>
+              <SelectItem value="progress" className="text-xs font-semibold cursor-pointer">Progress %</SelectItem>
+              <SelectItem value="status" className="text-xs font-semibold cursor-pointer">Status</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Hover Popup */}
+      {/* Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-24 border border-dashed border-white/10 rounded-xl bg-[#12151F]/40">
+          <Film className="h-10 w-10 mx-auto text-[#94A3B8]/40 mb-3" />
+          <p className="text-white text-base font-bold">
+            {searchQuery ? "No matches found in your watch list" : "Your watch list is empty"}
+          </p>
+          {!searchQuery && (
+            <p className="text-[#94A3B8] text-xs mt-1">
+              Start streaming movies and series to automatically build your continue watching shelf.
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <AnimatePresence mode="popLayout">
+              {displayed.map((item) => (
+                <RichHistoryCard
+                  key={item.id}
+                  item={item}
+                  onDelete={handleDelete}
+                  onResume={handleResume}
+                  onStatusChange={handleStatusChange}
+                  onHoverEnter={handleMouseEnter}
+                  onHoverLeave={handleMouseLeave}
+                  onHoverMove={handleMouseMove}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+          {displayCount < filtered.length && (
+            <div className="text-center pt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg font-bold text-xs px-6 bg-white/10 text-white border-white/15 hover:bg-white/20 cursor-pointer"
+                onClick={() => setDisplayCount((c) => c + 20)}
+              >
+                Load More ({filtered.length - displayCount} remaining)
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Hover Detail Modal */}
       {showHoverMenu && (
         <div
-          className="fixed z-50 bg-popover text-popover-foreground rounded-xl shadow-2xl p-4 max-w-sm border border-border animate-in fade-in zoom-in duration-200"
+          className="fixed z-50 bg-[#12151F]/95 backdrop-blur-xl text-white rounded-lg shadow-2xl p-4 max-w-xs border border-white/15 pointer-events-none transition-all duration-150"
           style={{
             left: `${hoverPosition.x + 16}px`,
             top: `${hoverPosition.y + 16}px`,
             transform:
-              hoverPosition.x > (typeof window !== "undefined" ? window.innerWidth - 400 : 800)
+              hoverPosition.x > (typeof window !== "undefined" ? window.innerWidth - 350 : 800)
                 ? "translateX(-110%)"
                 : "none",
           }}
         >
           {isLoading ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 py-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <span className="text-sm font-medium">Loading details...</span>
+              <span className="text-xs font-semibold text-[#94A3B8]">Loading title details...</span>
             </div>
           ) : hoverData ? (
-            <div className="space-y-3">
-              <h3 className="font-bold text-base leading-tight">
+            <div className="space-y-2.5">
+              <h3 className="font-bold text-sm leading-tight text-white">
                 {"title" in hoverData ? hoverData.title : hoverData.name}
               </h3>
               {hoverData.backdrop_path && (
-                <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-inner">
+                <div className="relative w-full aspect-video rounded-md overflow-hidden">
                   <Image
                     src={`https://image.tmdb.org/t/p/w500${hoverData.backdrop_path}`}
                     alt="Backdrop"
@@ -412,26 +411,24 @@ export default function WatchHistoryPage() {
                   />
                 </div>
               )}
-              <p className="text-xs text-muted-foreground line-clamp-3">
+              <p className="text-[11px] text-[#94A3B8] line-clamp-3">
                 {hoverData.overview}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-muted-foreground border-t pt-2">
+              <div className="flex items-center justify-between text-[10px] text-[#94A3B8] border-t border-white/10 pt-2 font-semibold">
                 {hoverData.vote_average && (
-                  <div>
-                    <span className="font-semibold text-primary">Rating:</span>{" "}
-                    {hoverData.vote_average.toFixed(1)}/10
-                  </div>
+                  <span className="text-[#F59E0B]">
+                    ★ {hoverData.vote_average.toFixed(1)} / 10
+                  </span>
                 )}
                 {"runtime" in hoverData && hoverData.runtime && (
-                  <div>
-                    <span className="font-semibold text-primary">Runtime:</span>{" "}
+                  <span>
                     {Math.floor(hoverData.runtime / 60)}h {hoverData.runtime % 60}m
-                  </div>
+                  </span>
                 )}
               </div>
             </div>
           ) : (
-            <div className="text-xs text-destructive">Failed to load details</div>
+            <div className="text-xs text-red-400">Failed to load preview</div>
           )}
         </div>
       )}
@@ -466,21 +463,20 @@ function RichHistoryCard({
             : { watched: 0, total: 0, percent: 0 };
         })();
 
-  const statusIcon = statusIcons[item.watch_status] || null;
   const statusColor = statusColors[item.watch_status] || "";
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.25 }}
-      className="group relative rounded-2xl overflow-hidden border border-border/50 bg-card hover:shadow-xl transition-shadow cursor-pointer"
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className="group relative rounded-lg overflow-hidden border border-white/[0.08] bg-[#12151F] hover:border-white/25 hover:shadow-xl transition-all cursor-pointer"
     >
       {/* Poster */}
       <div
-        className="relative aspect-[2/3] overflow-hidden"
+        className="relative aspect-[2/3] overflow-hidden bg-black"
         onMouseEnter={(e) => onHoverEnter(e, item)}
         onMouseLeave={onHoverLeave}
         onMouseMove={onHoverMove}
@@ -498,43 +494,43 @@ function RichHistoryCard({
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-muted/50 flex items-center justify-center">
-            <Film className="h-10 w-10 text-muted-foreground" />
+          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+            <Film className="h-8 w-8 text-[#94A3B8]" />
           </div>
         )}
 
-        {/* Progress bar on poster */}
+        {/* Netflix-style Red Progress Bar Line on Poster */}
         {prog.percent > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/30">
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60 z-20">
             <div
-              className="h-full bg-primary transition-all duration-500"
+              className="h-full bg-primary transition-all duration-300"
               style={{ width: `${prog.percent}%` }}
             />
           </div>
         )}
 
-        {/* Hover overlay with quick actions */}
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3">
+        {/* Hover overlay with streaming quick actions */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3 z-10">
           <Button
             size="sm"
-            variant="secondary"
-            className="w-full rounded-full font-bold gap-2 text-xs"
+            className="w-full rounded-md font-bold text-xs bg-white text-black hover:bg-white/90 gap-1.5 h-8 shadow-md"
             onClick={(e) => {
               e.stopPropagation();
               onResume(item);
             }}
           >
-            <Play className="h-3 w-3 fill-current" />
+            <Play className="h-3 w-3 fill-black ml-0.5" />
             {item.watch_status === "Plan to Watch" ? "Start" : "Resume"}
           </Button>
-          <div className="flex gap-2 w-full">
+
+          <div className="flex gap-1.5 w-full">
             {(["Watching", "Completed", "Plan to Watch"] as const).map((s) => (
-              <Button
+              <button
                 key={s}
-                size="sm"
-                variant={item.watch_status === s ? "default" : "outline"}
-                className={`flex-1 rounded-full text-[9px] font-bold ${
-                  item.watch_status === s ? "" : "bg-background/60 hover:bg-background/80"
+                className={`flex-1 rounded py-1 text-[9px] font-black uppercase tracking-wider border transition-colors ${
+                  item.watch_status === s
+                    ? "bg-primary border-primary text-white"
+                    : "bg-white/10 border-white/15 text-slate-300 hover:bg-white/20"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -542,13 +538,14 @@ function RichHistoryCard({
                 }}
               >
                 {s === "Watching" ? "W" : s === "Completed" ? "C" : "P"}
-              </Button>
+              </button>
             ))}
           </div>
+
           <Button
             size="sm"
             variant="destructive"
-            className="w-full rounded-full font-bold gap-2 text-xs mt-auto"
+            className="w-full rounded-md font-semibold gap-1 text-[11px] h-7 mt-auto"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(item.id);
@@ -559,38 +556,34 @@ function RichHistoryCard({
           </Button>
         </div>
 
-        {/* Type badge */}
-        <div className="absolute top-2 left-2">
-          <Badge
-            variant="outline"
-            className={`text-[9px] font-black uppercase border-border/40 bg-background/60 backdrop-blur-sm flex items-center gap-1 ${statusColor}`}
-          >
-            {statusIcon}
+        {/* Type Badge */}
+        <div className="absolute top-2 left-2 z-10">
+          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-white border border-white/10">
             {item.type === "TV" ? "SERIES" : "MOVIE"}
-          </Badge>
+          </span>
         </div>
       </div>
 
       {/* Info below poster */}
-      <div className="p-3 space-y-1.5">
-        <h3 className="text-sm font-bold line-clamp-1 group-hover:text-primary transition-colors">
+      <div className="p-2.5 space-y-1">
+        <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-primary transition-colors">
           {item.title}
         </h3>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-[10px]">
           {item.type === "TV" && prog.total > 0 ? (
-            <span className="text-[10px] font-bold text-muted-foreground">
+            <span className="font-semibold text-[#94A3B8]">
               {prog.watched}/{prog.total} eps
             </span>
           ) : prog.percent > 0 ? (
-            <span className="text-[10px] font-bold text-muted-foreground">
-              {prog.percent}% watched
+            <span className="font-semibold text-primary">
+              {prog.percent}%
             </span>
           ) : (
-            <span className="text-[10px] font-bold text-muted-foreground">—</span>
+            <span className="text-[#94A3B8]">—</span>
           )}
-          <Badge className={`text-[9px] font-black uppercase ${statusColor}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${statusColor}`}>
             {item.watch_status}
-          </Badge>
+          </span>
         </div>
       </div>
     </motion.div>

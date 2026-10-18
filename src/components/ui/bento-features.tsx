@@ -3,89 +3,97 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Film, Tv, PlayCircle, HeartPulse } from "lucide-react";
+import { ArrowRight, Film, Tv, Play, Sparkles } from "lucide-react";
 
-const features = [
+const channels = [
   {
-    title: "Cinematic Movies",
-    description: "Experience blockbusters in stunning HD. From timeless classics to the latest releases.",
+    title: "Cinematic Blockbusters",
+    subtitle: "New Releases & Timeless Classics",
+    description:
+      "Explore thousands of top-rated Hollywood, world cinema, and independent films with 4K resolution and high bitrates.",
     href: "/movies",
     icon: Film,
     image: "/movie.jpg",
-    colSpan: "col-span-1 md:col-span-1 lg:col-span-1",
-    rowSpan: "row-span-1",
-    accent: "bg-blue-500/10",
-    textAccent: "text-blue-500",
+    badge: "MOVIES HUB",
+    color: "from-red-600/30 to-transparent",
   },
   {
-    title: "Trending Web Series",
-    description: "Binge-watch the most talked-about shows. Seamless playback, zero interruptions.",
+    title: "Binge-Worthy Web Series",
+    subtitle: "Full Seasons & Daily Episodes",
+    description:
+      "Follow epic dramas, gripping thrillers, and award-winning series with automated episode tracking and progress memory.",
     href: "/web-series",
     icon: Tv,
     image: "/series.jpg",
-    colSpan: "col-span-1 md:col-span-1 lg:col-span-1",
-    rowSpan: "row-span-1",
-    accent: "bg-purple-500/10",
-    textAccent: "text-purple-500",
+    badge: "SERIES HUB",
+    color: "from-blue-600/30 to-transparent",
   },
 ];
 
 export const BentoFeatures = () => {
   return (
-    <section className="py-24 px-4 container mx-auto relative z-30">
-      <div className="flex flex-col space-y-4 mb-16 text-center lg:text-left">
-        <h2 className="text-3xl md:text-5xl font-black tracking-tight">
-          Explore the Ecosystem
-        </h2>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto lg:mx-0 font-medium">
-          A truly diverse collection tailored for every mood. Select your portal.
+    <section className="py-16 md:py-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-7xl mx-auto relative z-30">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+            <Sparkles className="h-3.5 w-3.5" />
+            Curated Entertainment
+          </div>
+          <h2 className="text-3xl md:text-4xl font-display font-black tracking-tight text-white">
+            Choose Your Destination
+          </h2>
+        </div>
+        <p className="text-sm font-medium text-[#94A3B8] max-w-md">
+          Seamlessly navigate between blockbuster feature films and episodic television series.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-[400px]">
-        {features.map((feature, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        {channels.map((channel, index) => (
           <motion.div
-            key={feature.title}
+            key={channel.title}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={`group relative overflow-hidden rounded-3xl border border-border/50 bg-card shadow-lg transition-all duration-500 hover:shadow-2xl hover:border-primary/30 ${feature.colSpan} ${feature.rowSpan}`}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: index * 0.15 }}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#12151F] shadow-xl hover:border-white/20 transition-all duration-500 min-h-[340px] md:min-h-[380px]"
           >
-            <Link href={feature.href} className="absolute inset-0 z-20 flex flex-col justify-between p-6 h-full">
-              {/* Top Icons */}
-              <div className="flex justify-between items-start w-full">
-                <div className={`p-3 rounded-2xl backdrop-blur-md border border-white/10 ${feature.accent}`}>
-                  <feature.icon className={`h-6 w-6 ${feature.textAccent}`} />
-                </div>
-                <div className="p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-4 transition-all duration-500">
-                   <ArrowUpRight className="h-5 w-5 text-white" />
+            <Link href={channel.href} className="absolute inset-0 z-20 flex flex-col justify-between p-6 md:p-8">
+              {/* Top Row */}
+              <div className="flex items-center justify-between">
+                <span className="px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-wider bg-black/60 backdrop-blur-md border border-white/15 text-white">
+                  {channel.badge}
+                </span>
+
+                <div className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/15 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+                  <ArrowRight className="h-4 w-4 text-white group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
 
-              {/* Text Content */}
-              <div className="mt-auto z-10 space-y-2 relative">
-                {/* Text Gradient Protection */}
-                <div className="absolute inset-0 -m-6 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-[-1]" />
-                
-                <h3 className="text-2xl font-black tracking-tight text-white group-hover:text-primary transition-colors duration-300">
-                  {feature.title}
+              {/* Bottom Content */}
+              <div className="space-y-2.5 z-10">
+                <h3 className="text-2xl md:text-3xl font-display font-black tracking-tight text-white group-hover:text-primary transition-colors duration-300">
+                  {channel.title}
                 </h3>
-                <p className="text-sm text-gray-300 font-medium line-clamp-2 max-w-md">
-                  {feature.description}
+                <p className="text-sm font-semibold text-primary/90">
+                  {channel.subtitle}
+                </p>
+                <p className="text-xs md:text-sm text-[#94A3B8] font-medium leading-relaxed max-w-md line-clamp-2">
+                  {channel.description}
                 </p>
               </div>
             </Link>
 
-            {/* Background Image */}
+            {/* Backdrop Image & Streaming Gradient */}
             <div className="absolute inset-0 z-0">
               <Image
-                src={feature.image}
-                alt={feature.title}
+                src={channel.image}
+                alt={channel.title}
                 fill
-                className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-40"
+                className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-40 group-hover:opacity-30"
               />
-              <div className="absolute inset-0 bg-background/20 mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#090A10] via-[#090A10]/60 to-transparent" />
+              <div className={`absolute inset-0 bg-gradient-to-r ${channel.color}`} />
             </div>
           </motion.div>
         ))}

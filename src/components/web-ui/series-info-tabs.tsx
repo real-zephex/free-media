@@ -2,9 +2,7 @@ import { TVInfo, TVCredits, TVImages } from "@/utils/types";
 import { Star, Users, Info, Image as ImageIcon, Tv, BarChart3, Calendar, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { tmdbImageUrl } from "@/lib/tmdb-image";
 
 const SeriesInfoTabs = async ({
@@ -17,182 +15,188 @@ const SeriesInfoTabs = async ({
   artwork: TVImages;
 }) => {
   return (
-    <main className="w-full">
+    <div className="w-full space-y-6">
       <Tabs defaultValue="info" className="w-full">
-        <TabsList className="w-full justify-start rounded-none bg-transparent border-b h-12 p-0 mb-6">
-          <TabsTrigger 
-            value="info" 
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 h-full font-bold transition-all"
+        {/* Streaming Tabs Navigation */}
+        <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-white/[0.08] h-12 p-0 mb-6 gap-6 sm:gap-8 overflow-x-auto no-scrollbar">
+          <TabsTrigger
+            value="info"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-white text-[#94A3B8] data-[state=active]:bg-transparent px-1 pb-3 pt-0 font-bold text-sm tracking-wide transition-all cursor-pointer"
           >
-            <Info className="h-4 w-4 mr-2" />
-            Overview
+            Overview & Stats
           </TabsTrigger>
-          <TabsTrigger 
-            value="cast" 
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 h-full font-bold transition-all"
+          <TabsTrigger
+            value="cast"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-white text-[#94A3B8] data-[state=active]:bg-transparent px-1 pb-3 pt-0 font-bold text-sm tracking-wide transition-all cursor-pointer"
           >
-            <Users className="h-4 w-4 mr-2" />
-            Cast
+            Cast & Crew
           </TabsTrigger>
-          <TabsTrigger 
-            value="artworks" 
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 h-full font-bold transition-all"
+          <TabsTrigger
+            value="artworks"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-white text-[#94A3B8] data-[state=active]:bg-transparent px-1 pb-3 pt-0 font-bold text-sm tracking-wide transition-all cursor-pointer"
           >
-            <ImageIcon className="h-4 w-4 mr-2" />
             Gallery
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="info" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <section>
-            <h2 className="text-2xl font-black mb-4 flex items-center gap-2 tracking-tight">
-              <span className="w-1.5 h-8 bg-primary rounded-full" />
-              Synopsis
-            </h2>
-            <p className="text-muted-foreground leading-relaxed text-lg italic border-l-4 border-primary/20 pl-6 py-2 bg-muted/10 rounded-r-xl">
-              {data.overview}
+        {/* Tab 1: Overview */}
+        <TabsContent value="info" className="space-y-6 focus-visible:outline-none">
+          {/* Synopsis */}
+          <div className="bg-[#12151F] p-6 rounded-xl border border-white/[0.08] space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+              <Info className="h-4 w-4" /> Series Synopsis
+            </h3>
+            <p className="text-base text-slate-200 font-normal leading-relaxed">
+              {data.overview || "No overview available for this series."}
             </p>
-          </section>
+          </div>
 
-          <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 bg-muted/20 p-6 rounded-2xl border border-border/50">
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <BarChart3 className="h-3 w-3" /> Season Stats
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <BarChart3 className="h-3.5 w-3.5 text-primary" /> Season Stats
               </span>
-              <p className="font-semibold text-lg">{data.number_of_seasons} Seasons • {data.number_of_episodes} Episodes</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <ShieldCheck className="h-3 w-3" /> Production Status
-              </span>
-              <p className="font-semibold text-lg">{data.status}</p>
-            </div>
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <Star className="h-3 w-3" /> Popularity
-              </span>
-              <p className="font-semibold text-lg flex items-center gap-1.5">
-                {data.vote_average?.toFixed(1)} / 10
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 border-none" />
+              <p className="font-bold text-base text-white">
+                {data.number_of_seasons} Seasons • {data.number_of_episodes} Episodes
               </p>
             </div>
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <Calendar className="h-3 w-3" /> Aired Period
+
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Production Status
               </span>
-              <p className="font-semibold text-sm">
-                {data.first_air_date?.toString()} — {data.last_air_date?.toString() || "Present"}
+              <p className="font-bold text-base text-white">{data.status || "Ongoing"}</p>
+            </div>
+
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 text-[#F59E0B]" /> Rating
+              </span>
+              <div className="flex items-center gap-1.5 text-white font-bold text-base">
+                <Star className="h-4 w-4 fill-[#F59E0B] text-[#F59E0B]" />
+                <span>{data.vote_average?.toFixed(1) || "N/A"}</span>
+                <span className="text-xs text-[#94A3B8] font-normal">/ 10</span>
+              </div>
+            </div>
+
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-primary" /> Broadcast Timeline
+              </span>
+              <p className="font-bold text-xs sm:text-sm text-white">
+                {data.first_air_date?.toString() || "Unknown"} — {data.last_air_date?.toString() || "Present"}
               </p>
             </div>
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <Tv className="h-3 w-3" /> Networks
+
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <Tv className="h-3.5 w-3.5 text-primary" /> Networks
               </span>
-              <div className="flex flex-wrap gap-1 mt-1">
+              <div className="flex flex-wrap gap-1.5">
                 {data.networks?.map((item) => (
-                  <Badge key={item.id} variant="outline" className="text-[10px] bg-background">
+                  <span
+                    key={item.id}
+                    className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2 py-0.5 rounded border border-white/10"
+                  >
                     {item.name}
-                  </Badge>
+                  </span>
                 ))}
               </div>
             </div>
-            <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-primary/60 tracking-widest flex items-center gap-1.5">
-                <Info className="h-3 w-3" /> Genres
-              </span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {data.genres?.map((genre) => (
-                  <Badge key={genre.id} variant="secondary" className="text-[10px]">
-                    {genre.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </section>
-        </TabsContent>
 
-        <TabsContent value="cast" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {credits.cast && credits.cast.length > 0 ? (
-              credits.cast.map((item, index) => (
-                <Card key={index} className="overflow-hidden border-none bg-muted/30 hover:bg-muted/50 transition-all hover:-translate-y-1 group border border-border/50">
-                  <div className="relative aspect-[3/4]">
-                    <Image
-                      src={tmdbImageUrl(item.profile_path, "w185")}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      alt={item.name || "Cast Member"}
-                    />
-                  </div>
-                  <CardContent className="p-3">
-                    <h3 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors">{item.name}</h3>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1">{item.character}</p>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <p className="col-span-full text-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl">No cast info found</p>
-            )}
+            <div className="bg-[#12151F] p-5 rounded-xl border border-white/[0.08] space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5 text-primary" /> Genres
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {data.genres?.map((g) => (
+                  <span
+                    key={g.id}
+                    className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2 py-0.5 rounded border border-white/10"
+                  >
+                    {g.name}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="artworks" className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <section>
-            <h3 className="text-xl font-black mb-6 flex items-center gap-2 tracking-tight">
-              <span className="w-1.5 h-6 bg-primary rounded-full"></span>
-              Backdrops
-            </h3>
-            <ScrollArea className="w-full whitespace-nowrap rounded-2xl overflow-hidden">
-              <div className="flex space-x-4 pb-4">
-                {artwork.backdrops && artwork.backdrops.length > 0 ? (
-                  artwork.backdrops.map((item, index) => (
-                    <div className="relative w-[320px] aspect-video flex-shrink-0 rounded-xl overflow-hidden shadow-xl border border-border/50 group" key={index}>
-                      <Image
-                        src={tmdbImageUrl(item.file_path, "w780")}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        alt="Backdrop"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground p-10 bg-muted/20 w-full rounded-xl text-center">No backdrops found</p>
-                )}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </section>
+        {/* Tab 2: Cast */}
+        <TabsContent value="cast" className="focus-visible:outline-none">
+          {credits.cast && credits.cast.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {credits.cast.slice(0, 18).map((actor, idx) => (
+                <div key={idx} className="bg-[#12151F] p-3 rounded-lg border border-white/[0.08] space-y-2 text-center">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden border border-white/10 bg-black">
+                    <Image
+                      src={tmdbImageUrl(actor.profile_path, "w185")}
+                      fill
+                      alt={actor.name || "Actor"}
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-xs text-white line-clamp-1">{actor.name}</h5>
+                    <p className="text-[10px] text-[#94A3B8] line-clamp-1">{actor.character}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="py-12 text-center text-sm text-[#94A3B8]">
+              No cast details on record.
+            </p>
+          )}
+        </TabsContent>
 
-          <section>
-            <h3 className="text-xl font-black mb-6 flex items-center gap-2 tracking-tight">
-              <span className="w-1.5 h-6 bg-primary rounded-full"></span>
-              Posters
-            </h3>
-            <ScrollArea className="w-full whitespace-nowrap rounded-2xl overflow-hidden">
-              <div className="flex space-x-4 pb-4">
-                {artwork.posters && artwork.posters.length > 0 ? (
-                  artwork.posters.map((item, index) => (
-                    <div className="relative w-[180px] aspect-[2/3] flex-shrink-0 rounded-xl overflow-hidden shadow-xl border border-border/50 group" key={index}>
+        {/* Tab 3: Artworks */}
+        <TabsContent value="artworks" className="space-y-8 focus-visible:outline-none">
+          {artwork.backdrops && artwork.backdrops.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white">Backdrops</h4>
+              <ScrollArea className="w-full pb-3">
+                <div className="flex gap-4">
+                  {artwork.backdrops.slice(0, 10).map((b, i) => (
+                    <div key={i} className="relative w-72 sm:w-80 aspect-video shrink-0 rounded-lg overflow-hidden border border-white/10">
                       <Image
-                        src={tmdbImageUrl(item.file_path, "w500")}
+                        src={tmdbImageUrl(b.file_path, "w780")}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        alt="Poster"
-                        loading="lazy"
+                        alt="Backdrop"
+                        className="object-cover"
                       />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground p-10 bg-muted/20 w-full rounded-xl text-center">No posters found</p>
-                )}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </section>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
+          )}
+
+          {artwork.posters && artwork.posters.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white">Posters</h4>
+              <ScrollArea className="w-full pb-3">
+                <div className="flex gap-4">
+                  {artwork.posters.slice(0, 12).map((p, i) => (
+                    <div key={i} className="relative w-36 sm:w-44 aspect-[2/3] shrink-0 rounded-lg overflow-hidden border border-white/10">
+                      <Image
+                        src={tmdbImageUrl(p.file_path, "w500")}
+                        fill
+                        alt="Poster"
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   );
 };
 

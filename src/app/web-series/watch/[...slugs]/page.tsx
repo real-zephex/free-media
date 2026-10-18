@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Download, Info, Monitor, Layers } from "lucide-react";
+import { Star, Download, Info, Monitor, Layers, ChevronLeft, ArrowRight } from "lucide-react";
 import { EpisodeInfo, InfoImagesCreditsTV } from "@/utils/tv-requests/request";
 import { TVInfo, TVEpisodeInfo } from "@/utils/types";
 import { Metadata, ResolvingMetadata } from "next";
@@ -8,7 +8,6 @@ import WebSeriesWatchStatus from "@/components/web-ui/watch-status";
 import EmbedSourcePlayer, {
   EmbedSource,
 } from "@/components/embed-source-player";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
@@ -87,6 +86,7 @@ const SeriesPlayer = async ({ params }: Props) => {
   const seriesIdNum = parseInt(series_id, 10);
 
   let epData: TVEpisodeInfo | undefined;
+  let seriesData: TVInfo | undefined;
   let seasonEpisodeCounts: Record<number, number> | undefined;
 
   try {
@@ -104,6 +104,7 @@ const SeriesPlayer = async ({ params }: Props) => {
       type: "info",
       id: seriesIdNum,
     })) as TVInfo;
+    seriesData = seriesInfo;
     if (seriesInfo?.seasons) {
       seasonEpisodeCounts = {};
       seriesInfo.seasons.forEach((s) => {
@@ -147,79 +148,100 @@ const SeriesPlayer = async ({ params }: Props) => {
     },
   ];
 
+  const currentEpNum = parseInt(episode_number, 10);
+  const totalEpsInSeason = seasonEpisodeCounts?.[parseInt(season_number, 10)] ?? 999;
+  const hasNextEpisode = currentEpNum < totalEpsInSeason;
+
   return (
-    <main className="min-h-screen pb-20">
-      <div className="container mx-auto px-4 pt-20 md:pt-24 pb-6">
-        <EmbedSourcePlayer
-          sources={seriesLinksArray}
-          playerTitle="Series Player"
-          frameClassName="rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
-          headerExtra={
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className="px-4 py-1.5 border-primary/30 text-primary-foreground bg-primary font-black italic tracking-widest uppercase"
-              >
-                Watching S{season_number} E{episode_number}
-              </Badge>
-            </div>
-          }
-        />
+    <main className="min-h-screen pb-24 bg-background text-foreground">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-24 pb-8 space-y-6">
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href={`/web-series/${series_id}`}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#94A3B8] hover:text-white transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back to {seriesData?.name || "Series"}</span>
+          </Link>
 
-        <div className="mt-6 flex flex-col lg:flex-row gap-6">
-          {/* Status and Actions Card */}
-          <Card className="flex-1 bg-card/40 border-border/50 rounded-3xl overflow-hidden">
-            <CardContent className="p-0">
-              <WebSeriesWatchStatus
-                id={series_id}
-                season={season_number}
-                episode={episode_number}
-                title={
-                  epData && epData.name
-                    ? epData.name
-                    : `Episode ${episode_number}`
-                }
-                posterPath={
-                  epData && epData.still_path
-                    ? epData.still_path
-                    : "/placeholder.svg"
-                }
-                seasonEpisodeCounts={seasonEpisodeCounts}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Download and Share Card */}
-          <Card className="lg:w-80 bg-primary/5 border-primary/20 border-dashed rounded-3xl">
-            <CardContent className="p-6 flex flex-col justify-center items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Download className="h-6 w-6 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-bold">Quality Source</h4>
-                <p className="text-xs text-muted-foreground italic">
-                  Download this episode for offline viewing in high quality.
-                </p>
-              </div>
-              <Link
-                href={`https://vidvault.to/tv/${series_id}/${season_number}/${episode_number}`}
-                target="_blank"
-                className="w-full"
-              >
-                <Button className="w-full font-black uppercase tracking-widest group shadow-lg">
-                  Download{" "}
-                  <Download className="ml-2 h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          {hasNextEpisode && (
+            <Link
+              href={`/web-series/watch/${season_number}/${currentEpNum + 1}/${series_id}`}
+              className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+            >
+              <span>Next: Episode {currentEpNum + 1}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
 
-        {/* Episode Detailed Info Section */}
+        {/* Video Player Theater */}
+        <div className="bg-[#12151F] border border-white/[0.08] rounded-xl p-4 md:p-6 shadow-2xl relative">
+          <EmbedSourcePlayer
+            sources={seriesLinksArray}
+            playerTitle="Series Player"
+            headerExtra={
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold bg-[#00A8E1]/20 border border-[#00A8E1]/40 text-white px-3 py-1 rounded-md uppercase tracking-wider">
+                  Season {season_number} • Episode {episode_number}
+                </span>
+              </div>
+            }
+          />
+        </div>
+
+        {/* Status Tracker & Download Bar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-[#12151F] border border-white/[0.08] rounded-xl overflow-hidden">
+            <WebSeriesWatchStatus
+              id={series_id}
+              season={season_number}
+              episode={episode_number}
+              title={
+                epData && epData.name
+                  ? epData.name
+                  : `Episode ${episode_number}`
+              }
+              posterPath={
+                epData && epData.still_path
+                  ? epData.still_path
+                  : "/placeholder.svg"
+              }
+              seasonEpisodeCounts={seasonEpisodeCounts}
+            />
+          </div>
+
+          {/* Download Card */}
+          <div className="bg-[#12151F] border border-white/[0.08] rounded-xl p-5 flex flex-col justify-between gap-4">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <Download className="h-3.5 w-3.5" /> Offline Access
+              </span>
+              <h4 className="font-bold text-sm text-white">Download Episode</h4>
+              <p className="text-xs text-[#94A3B8]">
+                Save Episode {episode_number} in high definition for offline streaming.
+              </p>
+            </div>
+            <Link
+              href={`https://vidvault.to/tv/${series_id}/${season_number}/${episode_number}`}
+              target="_blank"
+              className="w-full"
+            >
+              <Button className="w-full font-bold text-xs uppercase tracking-wider h-10 bg-white/10 hover:bg-white/20 text-white border border-white/15 gap-2 rounded-lg cursor-pointer">
+                <Download className="h-3.5 w-3.5" />
+                Download S{season_number} E{episode_number}
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Episode Info Spotlight */}
         {epData && (
-          <section className="mt-12 group">
-            <div className="flex flex-col md:flex-row gap-8 bg-muted/20 border border-border/50 rounded-[2.5rem] p-6 lg:p-8 transition-all hover:bg-muted/30">
-              <div className="relative md:w-80 aspect-video shrink-0 rounded-2xl overflow-hidden shadow-xl border border-border/50">
+          <section className="bg-[#12151F] border border-white/[0.08] rounded-xl p-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Thumbnail */}
+              <div className="relative md:w-72 aspect-video shrink-0 rounded-lg overflow-hidden border border-white/10 bg-black">
                 <Image
                   src={
                     epData.still_path
@@ -228,55 +250,41 @@ const SeriesPlayer = async ({ params }: Props) => {
                   }
                   fill
                   alt="Episode Poster"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <Badge className="bg-primary/90 text-primary-foreground font-black">
+                <div className="absolute bottom-2 left-2">
+                  <span className="bg-black/80 backdrop-blur-md text-[10px] font-bold text-white px-2 py-0.5 rounded">
                     EPISODE {episode_number}
-                  </Badge>
+                  </span>
                 </div>
               </div>
 
-              <div className="flex-1 space-y-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 text-yellow-500">
-                    <Star className="h-5 w-5 fill-yellow-500" />
-                    <span className="text-xl font-black">
-                      {epData.vote_average?.toFixed(1)}
+              {/* Text Meta */}
+              <div className="flex-1 space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[#F59E0B]">
+                    <Star className="h-4 w-4 fill-[#F59E0B]" />
+                    <span className="text-sm font-bold">
+                      {epData.vote_average?.toFixed(1) || "N/A"}
                     </span>
-                    <span className="text-muted-foreground/40 font-black">
-                      / 10
-                    </span>
+                    <span className="text-xs text-[#94A3B8] font-normal">/ 10</span>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic leading-none">
-                    {epData.name}
+                  <h2 className="text-2xl md:text-3xl font-display font-black text-white tracking-tight">
+                    {epData.name || `Episode ${episode_number}`}
                   </h2>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 flex items-center gap-2">
-                    <Info className="h-3 w-3" /> Intel Report
-                  </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed italic border-l-4 border-primary/20 pl-6">
-                    {epData.overview ||
-                      "No transmission data available for this episode snippet."}
-                  </p>
-                </div>
+                <p className="text-sm text-slate-300 leading-relaxed max-w-3xl">
+                  {epData.overview || "No overview available for this episode."}
+                </p>
 
-                <div className="flex flex-wrap gap-4 pt-2">
-                  <div className="flex items-center gap-2 bg-background/50 px-4 py-2 rounded-full border border-border/50 shadow-sm">
-                    <Monitor className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-black uppercase">
-                      Season {season_number}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-background/50 px-4 py-2 rounded-full border border-border/50 shadow-sm">
-                    <Layers className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-black uppercase">
-                      TMDB ID: {series_id}
-                    </span>
-                  </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded border border-white/10">
+                    Season {season_number}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-1 rounded border border-white/10">
+                    TMDB ID: {series_id}
+                  </span>
                 </div>
               </div>
             </div>

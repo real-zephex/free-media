@@ -10,8 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { PlayCircle, Eye } from "lucide-react";
+import { PlayCircle, Eye, Bookmark, CheckCheck } from "lucide-react";
 import EmbedSourcePlayer, { EmbedSource } from "@/components/embed-source-player";
 
 const MoviePlayer = ({
@@ -51,30 +50,30 @@ const MoviePlayer = ({
   };
 
   return (
-    <Card className="border-none bg-transparent shadow-none">
+    <div className="w-full">
       <EmbedSourcePlayer
         sources={vidLinksArray}
         playerTitle="Movie Player"
         headerExtra={
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-              Status:
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+              Track Status:
             </span>
             <Select
               onValueChange={handleStatusChange}
               value={watchStatus === "Not found" ? "" : watchStatus}
             >
-              <SelectTrigger className="w-[180px] bg-card border-border/50 font-bold">
-                <SelectValue placeholder="Mark as?" />
+              <SelectTrigger className="w-[160px] bg-[#12151F] border-white/10 text-white font-semibold text-xs rounded-md">
+                <SelectValue placeholder="Add to List" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Watching" className="font-bold">
+              <SelectContent className="bg-[#12151F] border-white/10 text-white rounded-md shadow-2xl">
+                <SelectItem value="Watching" className="text-xs font-semibold cursor-pointer">
                   Watching
                 </SelectItem>
-                <SelectItem value="Completed" className="font-bold">
+                <SelectItem value="Completed" className="text-xs font-semibold cursor-pointer">
                   Completed
                 </SelectItem>
-                <SelectItem value="Plan to Watch" className="font-bold">
+                <SelectItem value="Plan to Watch" className="text-xs font-semibold cursor-pointer">
                   Plan to Watch
                 </SelectItem>
               </SelectContent>
@@ -82,28 +81,21 @@ const MoviePlayer = ({
           </div>
         }
         footer={
-          <div className="mt-4 p-4 bg-muted/20 rounded-2xl border border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <PlayCircle className="h-5 w-5 text-primary" />
-              <p className="text-sm font-medium">
-                Streaming{" "}
-                <span className="text-primary font-black italic">
-                  {movieData.title}
-                </span>{" "}
-                on
-                <span className="ml-1 text-foreground font-bold underline decoration-primary/30 underline-offset-4 cursor-pointer hover:text-primary transition-colors">
-                  Dramaflix
-                </span>
-              </p>
+          <div className="mt-3 p-3 bg-[#090A10]/60 rounded-lg border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 text-[#94A3B8]">
+              <PlayCircle className="h-4 w-4 text-primary" />
+              <span>
+                Streaming <strong className="text-white font-bold">{movieData.title}</strong> in High Definition
+              </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground font-bold">
+            <div className="flex items-center gap-1.5 text-[11px] text-[#94A3B8]/70">
               <Eye className="h-3 w-3" />
-              <span>Switch sources from the dropdown above</span>
+              <span>Switch servers if video buffers</span>
             </div>
           </div>
         }
       />
-    </Card>
+    </div>
   );
 };
 

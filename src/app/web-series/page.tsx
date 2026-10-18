@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import WebHomepageCards from "@/components/web-ui/homepage-cards";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Play, Info, TrendingUp, Star, Calendar, ArrowRight } from "lucide-react";
+import { Play, Info, Star, Tv } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,7 @@ const WebSeriesHomepage = async () => {
   const top = await TopPopularAiringTV({ type: "top_rated" });
   const airing = await TopPopularAiringTV({ type: "airing_today" });
   const trending = await TrendingTV({ time_window: "day" });
-  
+
   const heroShow = trending?.results?.[0];
 
   const categories = [
@@ -51,87 +51,100 @@ const WebSeriesHomepage = async () => {
   ];
 
   return (
-    <main className="min-h-screen pb-20 overflow-x-hidden">
-      {/* Hero Section */}
+    <main className="min-h-screen pb-24 overflow-x-hidden bg-background text-foreground">
+      {/* 1. Cinematic Billboard Spotlight */}
       {heroShow && (
-        <section className="relative w-full h-[60vh] md:h-[85vh] overflow-hidden">
+        <section className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden flex items-end">
           <Image
             src={`https://image.tmdb.org/t/p/original${heroShow.backdrop_path}`}
             alt={heroShow.name || "Hero Show"}
             fill
-            className="object-cover scale-105 blur-[2px] opacity-60"
+            className="object-cover object-center brightness-75 transition-transform duration-1000"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent hidden md:block" />
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090A10] via-[#090A10]/50 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#090A10] via-[#090A10]/70 to-transparent z-10 w-full md:w-3/4" />
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#090A10]/80 to-transparent z-10" />
 
-          <div className="absolute inset-0 flex items-center">
-            <div className="container mx-auto px-4 md:px-8 space-y-6">
-               <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-md border border-primary/30 px-4 py-2 rounded-full text-primary text-xs font-black uppercase tracking-widest animate-bounce">
-                  <TrendingUp className="h-4 w-4" />
-                  Streaming Sensation
-               </div>
-               
-               <div className="max-w-3xl space-y-4">
-                  <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none drop-shadow-2xl">
-                    {heroShow.name || heroShow.original_name}
-                  </h1>
-                  
-                  <div className="flex flex-wrap gap-4 items-center">
-                    <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 font-black">
-                      <Star className="h-3 w-3 mr-1 fill-yellow-500" />
-                      {heroShow.vote_average?.toFixed(1)}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 font-black">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {heroShow.first_air_date ? new Date(heroShow.first_air_date).getFullYear() : "N/A"}
-                    </Badge>
-                  </div>
+          {/* Content */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pb-16 md:pb-24 relative z-20 w-full">
+            <div className="max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-2 bg-[#00A8E1]/20 backdrop-blur-md border border-[#00A8E1]/40 px-3 py-1 rounded-md text-white text-xs font-black uppercase tracking-wider">
+                <Tv className="h-3.5 w-3.5 text-[#00A8E1]" />
+                #1 SERIES TODAY
+              </div>
 
-                  <p className="text-lg md:text-xl text-muted-foreground font-medium line-clamp-3 md:line-clamp-none max-w-2xl leading-relaxed drop-shadow-md">
-                    {heroShow.overview}
-                  </p>
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-tight text-white leading-none drop-shadow-2xl">
+                {heroShow.name || heroShow.original_name}
+              </h1>
 
-                  <div className="flex flex-wrap gap-4 pt-4">
-                    <Link href={`/web-series/${heroShow.id}`}>
-                      <Button size="lg" className="h-14 px-8 rounded-full font-black text-lg gap-3 shadow-xl hover:scale-105 transition-all">
-                        <Play className="h-6 w-6 fill-current" />
-                        Explore Series
-                      </Button>
-                    </Link>
-                    <Link href={`/web-series/${heroShow.id}`}>
-                      <Button size="lg" variant="secondary" className="h-14 px-8 rounded-full font-black text-lg gap-3 backdrop-blur-md bg-white/10 hover:bg-white/20 transition-all">
-                        <Info className="h-6 w-6" />
-                        Series Info
-                      </Button>
-                    </Link>
-                  </div>
-               </div>
+              <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold text-[#94A3B8]">
+                <span className="flex items-center gap-1 text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/20">
+                  <Star className="h-3.5 w-3.5 fill-[#F59E0B]" />
+                  {heroShow.vote_average?.toFixed(1)}
+                </span>
+                <span>
+                  {heroShow.first_air_date
+                    ? new Date(heroShow.first_air_date).getFullYear()
+                    : ""}
+                </span>
+                <Badge variant="outline" className="text-[10px] font-bold border-white/20 text-white px-1.5 py-0">
+                  SERIES
+                </Badge>
+                <Badge variant="outline" className="text-[10px] font-bold border-white/20 text-white px-1.5 py-0">
+                  HD
+                </Badge>
+              </div>
+
+              <p className="text-sm sm:text-base text-slate-300 font-normal line-clamp-3 leading-relaxed max-w-xl">
+                {heroShow.overview}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Link href={`/web-series/${heroShow.id}`}>
+                  <Button
+                    size="lg"
+                    className="h-12 px-7 rounded-lg bg-white text-black hover:bg-white/90 font-black text-sm gap-2.5 shadow-lg hover:scale-105 transition-all"
+                  >
+                    <Play className="h-4 w-4 fill-black" />
+                    Explore Series
+                  </Button>
+                </Link>
+                <Link href={`/web-series/${heroShow.id}`}>
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="h-12 px-6 rounded-lg bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/20 font-bold text-sm gap-2 hover:scale-105 transition-all"
+                  >
+                    <Info className="h-4 w-4" />
+                    Series Info
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Categories Tabs Section */}
-      <div className="container mx-auto px-4 md:px-8 -mt-10 md:-mt-20 relative z-30">
-        <Tabs defaultValue="trending" className="w-full space-y-12">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1">
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-3">
-                <span className="w-2 h-10 bg-primary rounded-full hidden md:block" />
-                Web Series
+      {/* 2. Categories & Catalog Rails */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 -mt-8 sm:-mt-12 relative z-30 space-y-8">
+        <Tabs defaultValue="trending" className="w-full space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-[#00A8E1] rounded-full" />
+              <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight text-white">
+                Explore Web Series
               </h2>
-              <p className="text-muted-foreground font-bold text-sm tracking-wide flex items-center gap-2">
-                Binge-worthy series handpicked for you <ArrowRight className="h-4 w-4" />
-              </p>
             </div>
-            
-            <TabsList className="bg-card/40 backdrop-blur-xl border border-border/50 p-1.5 h-auto rounded-full shadow-2xl overflow-x-auto no-scrollbar flex-shrink-0">
+
+            {/* Streaming Category Switcher */}
+            <TabsList className="bg-[#12151F] border border-white/10 p-1 h-auto rounded-lg overflow-x-auto no-scrollbar">
               {categories.map((cat) => (
                 <TabsTrigger
                   key={cat.value}
                   value={cat.value}
-                  className="rounded-full px-6 py-2.5 font-black text-sm transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="rounded-md px-4 py-2 font-bold text-xs uppercase tracking-wider text-[#94A3B8] data-[state=active]:bg-[#00A8E1] data-[state=active]:text-white transition-all cursor-pointer"
                 >
                   {cat.title}
                 </TabsTrigger>
@@ -140,10 +153,10 @@ const WebSeriesHomepage = async () => {
           </div>
 
           {categories.map((cat) => (
-            <TabsContent 
-              key={cat.value} 
+            <TabsContent
+              key={cat.value}
               value={cat.value}
-              className="mt-0 ring-offset-background focus-visible:outline-none"
+              className="mt-0 focus-visible:outline-none"
             >
               <WebHomepageCards data={cat.data} />
             </TabsContent>

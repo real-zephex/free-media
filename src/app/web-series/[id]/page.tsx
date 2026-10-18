@@ -9,6 +9,8 @@ import SeasonAccordion from "@/components/web-ui/season-accordion";
 import Image from "next/image";
 import React from "react";
 import { notFound } from "next/navigation";
+import { Star, Calendar, Layers, Tv } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Season {
   seasonNumber: number;
@@ -70,80 +72,136 @@ const WebSeriesInfoPage = async ({
   }
 
   const SeasonInfo = tempSeasonInfo;
+  const backdropUrl = series_info.backdrop_path || series_info.poster_path;
+  const year = series_info.first_air_date
+    ? new Date(series_info.first_air_date).getFullYear()
+    : "";
 
   return (
-    <main className="min-h-screen pb-20">
-      <div className="relative w-full h-[60vh] overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 scale-110 blur-[2px] opacity-40"
-          style={{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original${series_info.backdrop_path})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-background via-background/60 to-transparent z-10" />
+    <main className="min-h-screen pb-24 bg-background text-foreground">
+      {/* 1. Immersive Hero Backdrop Header */}
+      <section className="relative w-full h-[65vh] md:h-[75vh] overflow-hidden flex items-end">
+        {backdropUrl && (
+          <Image
+            src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
+            alt={series_info.name || "Series"}
+            fill
+            priority
+            className="object-cover object-center brightness-70 scale-105 transition-all duration-1000"
+          />
+        )}
+        {/* Streaming Vignettes */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090A10] via-[#090A10]/60 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#090A10] via-[#090A10]/70 to-transparent z-10 w-full md:w-3/4" />
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#090A10]/80 to-transparent z-10" />
 
-        <div className="container mx-auto h-full flex items-end px-4 pb-12 relative z-20">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-8 text-center md:text-left">
-            <div className="relative w-48 md:w-64 aspect-2/3 shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-background transform -rotate-1 md:rotate-0">
+        {/* Billboard Details */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pb-12 relative z-20 w-full">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 text-center md:text-left">
+            {/* Poster Thumbnail */}
+            <div className="relative w-36 sm:w-44 md:w-52 aspect-[2/3] shrink-0 rounded-lg overflow-hidden shadow-2xl border border-white/20 bg-[#12151F]">
               <Image
                 src={
                   series_info.poster_path
-                    ? `https://image.tmdb.org/t/p/original${series_info.poster_path}`
+                    ? `https://image.tmdb.org/t/p/w500${series_info.poster_path}`
                     : "/placeholder.svg"
                 }
                 fill
-                alt="Series poster"
+                priority
+                alt={`${series_info.name} poster`}
                 className="object-cover"
               />
             </div>
-            <div className="flex flex-col gap-4">
-              <div className="space-y-1">
-                <SeriesHeroStatus seriesId={seriesIdNum} />
-                <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-none uppercase italic">
-                  {series_info.name}
-                </h1>
-              </div>
+
+            {/* Info details */}
+            <div className="space-y-3 max-w-3xl">
+              <SeriesHeroStatus seriesId={seriesIdNum} />
+
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white leading-none">
+                {series_info.name}
+              </h1>
+
               {series_info.tagline && (
-                <p className="text-xl md:text-2xl font-medium text-muted-foreground/80 italic border-l-4 border-primary/40 pl-4">
-                  {series_info.tagline}
+                <p className="text-base sm:text-lg text-slate-300 italic font-medium">
+                  &ldquo;{series_info.tagline}&rdquo;
                 </p>
+              )}
+
+              {/* Metadata Badges */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs sm:text-sm font-semibold text-[#94A3B8]">
+                {series_info.vote_average && series_info.vote_average > 0 && (
+                  <span className="flex items-center gap-1 text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/20">
+                    <Star className="h-3.5 w-3.5 fill-[#F59E0B]" />
+                    {series_info.vote_average.toFixed(1)}
+                  </span>
+                )}
+                {year && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {year}
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Layers className="h-3.5 w-3.5" />
+                  {series_info.number_of_seasons || 1} Seasons
+                </span>
+                <Badge variant="outline" className="text-[10px] font-bold border-white/20 text-white px-1.5 py-0">
+                  HD
+                </Badge>
+              </div>
+
+              {/* Genre Chips */}
+              {series_info.genres && series_info.genres.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 pt-1">
+                  {series_info.genres.map((g) => (
+                    <span
+                      key={g.id}
+                      className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded border border-white/10"
+                    >
+                      {g.name}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 mt-8">
-        <SeriesInfoTabs
-          data={series_info}
-          credits={credits_data}
-          artwork={images}
+      {/* 2. Container: Tracking Panel, Tabs, and Season Episodes */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 mt-8 space-y-10">
+        {/* Tracking Panel */}
+        <SeriesTrackingPanel
+          seriesId={seriesIdNum}
+          seriesTitle={series_info.name ?? ""}
+          posterPath={series_info.poster_path ?? null}
+          overview={series_info.overview ?? ""}
+          seasonEpisodeCounts={seasonEpisodeCounts}
         />
 
-        <div className="mt-8">
-          <SeriesTrackingPanel
-            seriesId={seriesIdNum}
-            seriesTitle={series_info.name ?? ""}
-            posterPath={series_info.poster_path ?? null}
-            overview={series_info.overview ?? ""}
-            seasonEpisodeCounts={seasonEpisodeCounts}
-          />
-        </div>
-
-        <div className="mt-16">
-          <h2 className="text-3xl font-black tracking-tight mb-6 flex items-center gap-3">
-            <span className="w-2 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
-            Season Archives
-          </h2>
+        {/* Season Archives */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-3 border-b border-white/[0.08] pb-3">
+            <span className="w-1.5 h-6 bg-[#00A8E1] rounded-full" />
+            <h2 className="text-xl md:text-2xl font-display font-black tracking-tight text-white">
+              Seasons & Episodes
+            </h2>
+          </div>
           <SeasonAccordion
             data={SeasonInfo}
             seriesId={seriesIdNum}
             seasonEpisodeCounts={seasonEpisodeCounts}
           />
-        </div>
+        </section>
+
+        {/* Info Tabs */}
+        <section className="pt-4">
+          <SeriesInfoTabs
+            data={series_info}
+            credits={credits_data}
+            artwork={images}
+          />
+        </section>
       </div>
     </main>
   );

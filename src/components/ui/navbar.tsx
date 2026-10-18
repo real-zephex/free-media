@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Play, Menu, Film, Tv, History, Search as SearchIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Play, Menu, Film, Tv, History, Compass } from "lucide-react";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Search from "../global-search";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const NAV_ITEMS = [
+  { name: "Home", href: "/", icon: Compass },
   { name: "Movies", href: "/movies", icon: Film },
-  { name: "Web-Series", href: "/web-series", icon: Tv },
-  { name: "Watch-History", href: "/watch-history", icon: History },
+  { name: "TV Shows", href: "/web-series", icon: Tv },
+  { name: "Watch History", href: "/watch-history", icon: History },
 ];
 
 const Navbar = () => {
@@ -27,89 +28,108 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 30);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 pointer-events-none">
-      <motion.header 
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className={cn(
-          "pointer-events-auto flex items-center gap-2 md:gap-6 px-4 md:px-6 py-2 md:py-3 rounded-full border transition-all duration-500",
-          "bg-background/40 backdrop-blur-2xl border-white/10 shadow-2xl shadow-black/50",
-          isScrolled ? "mt-0" : "mt-2 md:mt-4"
-        )}
-      >
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity mr-2">
-          <div className="bg-primary rounded-full p-1.5 shadow-lg shadow-primary/20">
-            <Play className="h-4 w-4 md:h-5 md:w-5 text-primary-foreground fill-current ml-0.5" />
-          </div>
-          <span className="font-display font-bold text-lg md:text-xl tracking-tight hidden sm:block">
-            Dramaflix
-          </span>
-        </Link>
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
+        isScrolled
+          ? "bg-[#090A10]/95 backdrop-blur-md border-b border-white/[0.08] shadow-2xl py-3 px-4 md:px-10 lg:px-16"
+          : "bg-gradient-to-b from-black/90 via-black/50 to-transparent py-4 md:py-6 px-4 md:px-10 lg:px-16"
+      )}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left: Brand + Desktop Navigation */}
+        <div className="flex items-center gap-8 md:gap-10">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="bg-primary rounded-md p-1.5 shadow-[0_0_18px_rgba(229,9,20,0.6)] group-hover:scale-105 transition-transform duration-300">
+              <Play className="h-4 w-4 md:h-5 md:w-5 text-white fill-current ml-0.5" />
+            </div>
+            <span className="font-display font-black text-xl md:text-2xl tracking-tighter text-white group-hover:text-primary transition-colors">
+              DRAMAFLIX
+            </span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link 
-                key={item.href}
-                href={item.href} 
-                className={cn(
-                  "relative px-4 py-2 text-sm font-medium transition-colors rounded-full",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="active-pill"
-                    className="absolute inset-0 bg-primary/10 rounded-full -z-10 border border-primary/20"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            {NAV_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "relative text-sm font-semibold tracking-wide transition-colors py-1 hover:text-white",
+                    isActive
+                      ? "text-white font-bold"
+                      : "text-[#94A3B8]"
+                  )}
+                >
+                  {item.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-nav-line"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full shadow-[0_0_8px_rgba(229,9,20,0.8)]"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
-        <div className="h-6 w-[1px] bg-white/10 hidden lg:block mx-2" />
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
           <Search />
-          
-          {/* Mobile Menu Toggle */}
-          <div className="flex lg:hidden">
+
+          {/* Mobile Menu */}
+          <div className="flex md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
-                  <Menu className="h-5 w-5 text-muted-foreground" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-lg hover:bg-white/10 text-white"
+                >
+                  <Menu className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-4 p-2 bg-background/80 backdrop-blur-xl border-white/10 rounded-2xl">
-                {NAV_ITEMS.map((item) => (
-                  <DropdownMenuItem key={item.href} asChild>
-                    <Link href={item.href} className="flex items-center gap-3 p-3 rounded-xl cursor-not-available">
-                        <item.icon className="h-4 w-4" />
-                        <span className="font-medium">{item.name}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+              <DropdownMenuContent
+                align="end"
+                className="w-56 mt-3 p-2 bg-[#12151F]/95 backdrop-blur-xl border-white/10 rounded-xl shadow-2xl text-white"
+              >
+                {NAV_ITEMS.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <DropdownMenuItem key={item.href} asChild>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 p-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+                          isActive
+                            ? "bg-primary/20 text-white font-bold"
+                            : "text-[#94A3B8] hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 text-primary" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-      </motion.header>
-    </div>
+      </div>
+    </header>
   );
 };
 

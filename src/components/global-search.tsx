@@ -2,7 +2,7 @@
 
 import { useState, useCallback, ReactNode } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { Search as SearchIcon, Loader2, Command } from "lucide-react";
+import { Search as SearchIcon, Loader2, Sparkles } from "lucide-react";
 
 import { MoviesSearchRequest } from "@/utils/movie-requests/request";
 import { SearchTV } from "@/utils/tv-requests/request";
@@ -12,7 +12,7 @@ import { clientFetch } from "@/utils/client-cache";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,8 @@ const Search = () => {
 
       setIsLoading(true);
       setFormat(
-        <div className="flex h-[300px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex h-[240px] items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>,
       );
 
@@ -50,7 +50,7 @@ const Search = () => {
         setFormat(<CombinedSearch moviesData={moviesData} tvData={tvData} />);
       } catch (error) {
         console.error("Search failed:", error);
-        setFormat(<div className="p-4 text-center text-destructive">Search failed. Please try again.</div>);
+        setFormat(<div className="p-4 text-center text-red-400 text-xs">Search failed. Please try again.</div>);
       } finally {
         setIsLoading(false);
       }
@@ -66,59 +66,53 @@ const Search = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="relative h-9 w-9 md:w-auto md:h-10 md:px-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-all flex items-center gap-2 group"
+        <button
+          className="relative h-9 px-3 rounded-md bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 text-[#94A3B8] hover:text-white transition-all flex items-center gap-2.5 cursor-pointer text-xs font-semibold"
           onClick={() => setIsOpen(true)}
         >
-          <SearchIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
-          <span className="hidden md:inline-flex font-display text-sm font-medium">Search...</span>
-          <kbd className="pointer-events-none hidden md:flex h-5 select-none items-center gap-1 rounded-full bg-white/10 px-2 font-mono text-[10px] font-medium opacity-50">
-            <span className="text-[10px]">⌘</span>K
+          <SearchIcon className="h-3.5 w-3.5 text-white/70" />
+          <span className="hidden sm:inline-flex">Search catalog...</span>
+          <kbd className="pointer-events-none hidden sm:flex h-4 select-none items-center gap-0.5 rounded bg-white/10 px-1.5 font-mono text-[9px] text-[#94A3B8]">
+            ⌘K
           </kbd>
-        </Button>
+        </button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden bg-background/60 backdrop-blur-3xl border-white/10 shadow-2xl rounded-[2rem] md:rounded-[3rem]">
-        <div className="p-4 md:p-6 space-y-4">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-4 md:px-6 py-3 md:py-4 transition-all group-focus-within:border-primary/50 group-focus-within:bg-white/10">
-              <SearchIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input
-                className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 text-base md:text-xl h-auto p-0 font-display font-medium placeholder:text-muted-foreground/50"
-                placeholder="What are you looking for?"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={handleSearch}
-                autoFocus
-              />
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  className="h-8 md:h-10 rounded-full font-display font-bold px-4 md:px-6 bg-primary hover:scale-105 transition-transform"
-                  onClick={() => handleSearch()}
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Find"}
-                </Button>
-              </div>
-            </div>
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden bg-[#090A10]/95 backdrop-blur-2xl border-white/15 shadow-2xl rounded-xl text-white">
+        <div className="p-5 md:p-6 space-y-4">
+          <div className="relative flex items-center gap-3 bg-[#12151F] border border-white/15 rounded-lg px-4 py-2.5 focus-within:border-primary/60 transition-colors">
+            <SearchIcon className="h-4 w-4 text-[#94A3B8]" />
+            <Input
+              className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 text-sm md:text-base h-auto p-0 font-sans font-medium text-white placeholder:text-[#94A3B8]/60"
+              placeholder="Search movies, TV shows, actors..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleSearch}
+              autoFocus
+            />
+            <Button
+              size="sm"
+              className="h-8 rounded-md font-bold text-xs px-4 bg-primary hover:bg-primary/90 text-white cursor-pointer"
+              onClick={() => handleSearch()}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Search"}
+            </Button>
           </div>
 
-          <ScrollArea className="h-[50vh] md:h-[60vh] px-2">
+          <ScrollArea className="h-[50vh] pr-2">
             <div
               onClick={() => {
                 setIsOpen(false);
                 setTitle("");
               }}
-              className="pb-4"
+              className="pb-2"
             >
               {format}
             </div>
             {!title && !format && (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/40">
-                <Command className="h-16 w-16 mb-4 opacity-10" />
-                <p className="font-display text-lg font-medium tracking-wide">Enter a title to begin your journey</p>
+              <div className="flex flex-col items-center justify-center py-16 text-[#94A3B8]/60 space-y-2">
+                <Sparkles className="h-8 w-8 opacity-40 text-primary" />
+                <p className="text-xs font-medium">Type a title and press Enter or Search</p>
               </div>
             )}
           </ScrollArea>

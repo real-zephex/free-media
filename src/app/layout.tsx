@@ -87,7 +87,7 @@ export default function RootLayout({
         /> */}
       </head>
       <body className={`${font_inter.variable} ${font_outfit.variable} font-sans antialiased`}>
-        <NextTopLoader showSpinner={false} />
+        <NextTopLoader color="#E50914" height={3} showSpinner={false} />
         <Navbar />
         <main className="min-h-screen bg-background text-foreground">
           {children}

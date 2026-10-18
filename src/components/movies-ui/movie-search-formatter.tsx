@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-
+import { Star } from "lucide-react";
 import { MoviesHomepageResults } from "@/utils/types";
 
 const MoviesSearch = ({
@@ -9,15 +9,13 @@ const MoviesSearch = ({
   data: MoviesHomepageResults | undefined;
 }) => {
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col gap-2">
       {data && data.results.length > 0 ? (
         data.results.map((item) => (
           <Link href={`/movies/${item.id}`} key={item.id} className="group">
             <span className="sr-only">View {item.title}</span>
-            <section
-              className="flex flex-row items-center mb-3 bg-white/5 border border-white/10 rounded-2xl transition-all duration-300 group-hover:bg-white/10 group-hover:border-primary/30 group-hover:shadow-lg group-hover:shadow-primary/5 overflow-hidden"
-            >
-              <div className="relative h-24 w-16 md:h-32 md:w-20 shrink-0 overflow-hidden">
+            <div className="flex flex-row items-center bg-[#12151F] border border-white/[0.08] rounded-lg p-2 transition-all duration-200 group-hover:bg-[#181C28] group-hover:border-white/20 overflow-hidden">
+              <div className="relative h-16 w-12 shrink-0 rounded overflow-hidden bg-black">
                 <Image
                   src={
                     item.poster_path
@@ -26,25 +24,31 @@ const MoviesSearch = ({
                   }
                   fill
                   alt={`${item.title} poster`}
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                   priority
                 />
               </div>
-              <div className="flex flex-col ml-4 pr-4 py-2 gap-1.5">
-                <p className="text-base md:text-lg font-display font-bold leading-tight group-hover:text-primary transition-colors">{item.title}</p>
-                {item.release_date && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-                      {item.release_date.split("-")[0]}
+              <div className="flex flex-col ml-3 pr-2 py-0.5 gap-1 min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-primary transition-colors">
+                  {item.title}
+                </p>
+                <div className="flex items-center gap-2 text-[10px] text-[#94A3B8]">
+                  {item.release_date && (
+                    <span>{item.release_date.split("-")[0]}</span>
+                  )}
+                  {typeof item.vote_average === "number" && item.vote_average > 0 && (
+                    <span className="flex items-center gap-0.5 text-[#F59E0B] font-semibold">
+                      <Star className="h-2.5 w-2.5 fill-[#F59E0B]" />
+                      {item.vote_average.toFixed(1)}
                     </span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </section>
+            </div>
           </Link>
         ))
       ) : (
-        <p className="py-1 text-center">No results found</p>
+        <p className="py-4 text-center text-xs text-[#94A3B8]">No movies found</p>
       )}
     </div>
   );
