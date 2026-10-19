@@ -4,6 +4,8 @@ import Link from "next/link";
 import { HeroSection } from "@/components/ui/hero-section";
 import { BentoFeatures } from "@/components/ui/bento-features";
 import { InfiniteMarquee } from "@/components/ui/infinite-marquee";
+import { MediaShelf } from "@/components/ui/media-shelf";
+import { HomeContinueWatching } from "@/components/home/continue-watching-shelf";
 import { TrendingTV } from "@/utils/tv-requests/request";
 import { MoviesDiscover } from "@/utils/movie-requests/request";
 import { MovieCard } from "@/components/movies-ui/movie-card";
@@ -46,69 +48,55 @@ export default async function Home() {
     if (trendingSeriesImages[i]) allPosters.push(trendingSeriesImages[i]);
   }
 
-  const featuredItem = trendingMovies[0] || trendingSeries[0];
+  const heroItems = trendingMovies.slice(0, 5);
+  const featuredItem = heroItems[0] || trendingSeries[0];
 
   return (
     <main className="relative flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* 1. Cinematic Spotlight Billboard Hero */}
-      <HeroSection featured={featuredItem} />
+      {/* 1. Cinematic Spotlight Billboard Hero (Top 5 Rotating Carousel) */}
+      <HeroSection featured={featuredItem} featuredItems={heroItems} />
 
       {/* 2. Streaming Rails Container */}
-      <div className="relative z-20 space-y-12 md:space-y-16 -mt-10 sm:-mt-16 md:-mt-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-7xl mx-auto w-full">
-        {/* Shelf 1: Trending Movies */}
-        {trendingMovies.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Link
-                href="/movies"
-                className="group inline-flex items-center gap-2 text-xl md:text-2xl font-display font-black tracking-tight text-white hover:text-primary transition-colors"
-              >
-                <span className="w-1.5 h-6 bg-primary rounded-full" />
-                <span>Trending Movies</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-              </Link>
-              <Link
-                href="/movies"
-                className="text-xs md:text-sm font-semibold text-[#94A3B8] hover:text-white transition-colors"
-              >
-                Explore All
-              </Link>
-            </div>
+      <div className="relative z-20 space-y-10 md:space-y-14 -mt-10 sm:-mt-16 md:-mt-24 px-4 sm:px-6 md:px-10 lg:px-16 max-w-7xl mx-auto w-full">
+        {/* Continue Watching Shelf (Dynamic from client localStorage) */}
+        <HomeContinueWatching />
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
-              {trendingMovies.slice(0, 6).map((movie, idx) => (
-                <MovieCard key={movie.id} movie={movie} index={idx} />
-              ))}
-            </div>
-          </section>
+        {/* Shelf 1: Trending Movies (Horizontal Rail with Chevrons) */}
+        {trendingMovies.length > 0 && (
+          <MediaShelf
+            title="Trending Movies"
+            subtitle="Top streamed theatrical blockbusters and indie hits"
+            href="/movies"
+            accentColor="bg-primary"
+          >
+            {trendingMovies.map((movie, idx) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                index={idx}
+                className="w-[150px] sm:w-[170px] md:w-[195px] shrink-0"
+              />
+            ))}
+          </MediaShelf>
         )}
 
-        {/* Shelf 2: Binge-Worthy TV Shows */}
+        {/* Shelf 2: Binge-Worthy TV Shows (Horizontal Rail with Chevrons) */}
         {trendingSeries.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Link
-                href="/web-series"
-                className="group inline-flex items-center gap-2 text-xl md:text-2xl font-display font-black tracking-tight text-white hover:text-primary transition-colors"
-              >
-                <span className="w-1.5 h-6 bg-[#00A8E1] rounded-full" />
-                <span>Popular TV Series</span>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-              </Link>
-              <Link
-                href="/web-series"
-                className="text-xs md:text-sm font-semibold text-[#94A3B8] hover:text-white transition-colors"
-              >
-                Explore All
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
-              {trendingSeries.slice(0, 6).map((show, idx) => (
-                <SeriesCard key={show.id} series={show} index={idx} />
-              ))}
-            </div>
-          </section>
+          <MediaShelf
+            title="Popular TV Series"
+            subtitle="Critically acclaimed drama series, anime and comedy"
+            href="/web-series"
+            accentColor="bg-[#00A8E1]"
+          >
+            {trendingSeries.map((show, idx) => (
+              <SeriesCard
+                key={show.id}
+                series={show}
+                index={idx}
+                className="w-[150px] sm:w-[170px] md:w-[195px] shrink-0"
+              />
+            ))}
+          </MediaShelf>
         )}
       </div>
 

@@ -4,6 +4,7 @@ import NextTopLoader from "nextjs-toploader";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 import Navbar from "@/components/ui/navbar";
+import { PreviewProvider } from "@/components/ui/quick-preview-modal";
 import { font_inter, font_outfit } from "@/components/fonts";
 import Script from "next/script";
 
@@ -88,10 +89,12 @@ export default function RootLayout({
       </head>
       <body className={`${font_inter.variable} ${font_outfit.variable} font-sans antialiased`}>
         <NextTopLoader color="#E50914" height={3} showSpinner={false} />
-        <Navbar />
-        <main className="min-h-screen bg-background text-foreground">
-          {children}
-        </main>
+        <PreviewProvider>
+          <Navbar />
+          <main className="min-h-screen bg-background text-foreground">
+            {children}
+          </main>
+        </PreviewProvider>
       </body>
     </html>
   );
